@@ -4,6 +4,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from ckeditor.fields import RichTextField
 from cloudinary.models import CloudinaryField
+from django.core.exceptions import ValidationError
 
 
 # class CustomUserManager(BaseUserManager):
@@ -36,6 +37,11 @@ class User(AbstractUser):
     phone = models.CharField(max_length=10, null=False, unique=True)
 
     # objects = CustomUserManager()
+
+
+class UserAddresses(models.Model):
+    address = models.CharField(max_length=100, null=False)
+    user_details = models.ForeignKey(User, on_delete=models.CASCADE)
 
 
 class BaseModel(models.Model):
@@ -72,19 +78,26 @@ class Product(BaseModel):
     category = models.ForeignKey(Category, on_delete=models.PROTECT, null=False, default=None)
 
 
-class UserAddresses(models.Model):
-    address = models.CharField(max_length=100, null=False)
-    user_details = models.ForeignKey(User, on_delete=models.CASCADE)
+class ProductImageDetail(models.Model):
+    image = CloudinaryField()
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, default=None)
 
 
 class ProductImagesColors(models.Model):
     name_color = models.CharField(max_length=50)
-    url_image = CloudinaryField(null=True)
+    url_image = CloudinaryField()
     product = models.ForeignKey(Product, on_delete=models.CASCADE, default=None)
 
 
+def validate_video_size(value):
+    max_size = 30 * 1024 * 1024  # 50MB
+    if value.size > max_size:
+        raise ValidationError("Video size should not exceed 30MB.")
+
+
 class ProductVideos(models.Model):
-    url_video = CloudinaryField(null=True)
+    url_video = CloudinaryField(resource_type='video', allowed_formats=['mp4', 'webm'],
+                                validators=[validate_video_size])
     product = models.ForeignKey(Product, on_delete=models.CASCADE, default=None)
 
 
