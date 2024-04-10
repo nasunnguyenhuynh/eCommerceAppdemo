@@ -4,7 +4,8 @@ from django import forms
 from ckeditor_uploader.widgets import CKEditorUploadingWidget
 from django.utils.html import mark_safe
 from django.contrib.auth.admin import UserAdmin
-from .models import Category, User, Product, Shop, ProductInfo, ProductImageDetail, ProductImagesColors, ProductVideos
+from .models import Category, User, Product, Shop, ProductInfo, ProductImageDetail, ProductImagesColors, ProductVideos, \
+    ProductSell, Voucher, VoucherCondition
 
 
 class CategoryAdmin(admin.ModelAdmin):
@@ -23,6 +24,19 @@ class CustomUserAdmin(admin.ModelAdmin):
     def my_image(self, user):
         if user.avatar:
             return mark_safe(f"<img width='200' height='100' src='{user.avatar.url}' />")
+
+    def save_model(self, request, obj, form, change):
+        if change and not form.cleaned_data['password']:
+            return
+
+            # Lấy mật khẩu từ form
+        password = form.cleaned_data['password']
+
+        # Mã hóa mật khẩu trước khi lưu
+        if password:
+            obj.set_password(password)
+
+        super().save_model(request, obj, form, change)
 
 
 class ShopAdmin(admin.ModelAdmin):
@@ -44,17 +58,23 @@ class ProductInfoInline(admin.StackedInline):  # Hoặc InlineModelAdmin tùy th
 class ProductImageDetailInline(admin.StackedInline):
     model = ProductImageDetail
     extra = 1
-    max_num = 1
+    max_num = 20
 
 
 class ProductImagesColorInline(admin.StackedInline):
     model = ProductImagesColors
     extra = 1
-    max_num = 1
+    max_num = 20
 
 
 class ProductVideosInline(admin.StackedInline):
     model = ProductVideos
+    extra = 1
+    max_num = 10
+
+
+class ProductSellInline(admin.StackedInline):
+    model = ProductSell
     extra = 1
     max_num = 1
 
@@ -64,7 +84,8 @@ class ProductAdmin(admin.ModelAdmin):
     search_fields = ['id', 'name']
     list_filter = ['category_id', 'shop_id', 'price']
 
-    inlines = [ProductInfoInline, ProductImageDetailInline, ProductImagesColorInline, ProductVideosInline]
+    inlines = [ProductInfoInline, ProductImageDetailInline, ProductImagesColorInline, ProductVideosInline,
+               ProductSellInline]
 
     def my_image(self, product):
         if product.img:
@@ -114,6 +135,31 @@ class ProductVideosAdmin(admin.ModelAdmin):
             return mark_safe(f"<img width='200' height='200' src='{product.url_video.url}' />")
 
 
+class VoucherConditionInline(admin.StackedInline):
+    model = VoucherCondition
+    extra = 1
+    max_num = 1
+
+
+class VoucherAdmin(admin.ModelAdmin):
+    list_display = ['id', 'my_image', 'name', 'code', 'all_time_used', 'description', 'active']
+    search_fields = ['id', 'name', 'code']
+    list_filter = ['name']
+
+    inlines = [VoucherConditionInline]
+
+    def my_image(self, voucher):
+        if voucher.img:
+            return mark_safe(f"<img width='100' height='100' src='{voucher.img.url}' />")
+
+
+class VoucherConditionAdmin(admin.ModelAdmin):
+    list_display = ['id', 'voucher_id', 'order_fee_min', 'voucher_sale', 'voucher_sale_max', 'time_usable',
+                    'time_expired']
+    search_fields = ['id', 'time_usable', 'time_expired']
+    list_filter = ['id', 'order_fee_min', 'voucher_sale_max', 'time_usable', 'time_expired']
+
+
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(User, CustomUserAdmin)
 admin.site.register(Shop, ShopAdmin)
@@ -122,3 +168,5 @@ admin.site.register(ProductInfo, ProductInfoAdmin)
 admin.site.register(ProductImageDetail, ProductImageDetailAdmin)
 admin.site.register(ProductImagesColors, ProductImagesColorsAdmin)
 admin.site.register(ProductVideos, ProductVideosAdmin)
+admin.site.register(Voucher, VoucherAdmin)
+admin.site.register(VoucherCondition, VoucherConditionAdmin)

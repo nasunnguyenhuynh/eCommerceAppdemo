@@ -12,11 +12,10 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 import os
 from dotenv import load_dotenv
-
-load_dotenv()
-
 from pathlib import Path
 import cloudinary
+
+load_dotenv()
 
 cloudinary.config(
     cloud_name="diwxda8bi",
@@ -51,7 +50,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
     'ecommerce',
+    'rest_framework',
     'ckeditor',
     'ckeditor_uploader',
 ]
@@ -95,7 +96,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'ecommerceapp',
         'USER': 'root',
-        'PASSWORD': 'Admin@123',
+        'PASSWORD': 'root',
         'HOST': '',
     }
 }

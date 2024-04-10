@@ -85,19 +85,20 @@ class ProductImageDetail(models.Model):
 
 class ProductImagesColors(models.Model):
     name_color = models.CharField(max_length=50)
-    url_image = CloudinaryField()
+    url_image = CloudinaryField(default=None)
     product = models.ForeignKey(Product, on_delete=models.CASCADE, default=None)
 
 
 def validate_video_size(value):
-    max_size = 30 * 1024 * 1024  # 50MB
-    if value.size > max_size:
-        raise ValidationError("Video size should not exceed 30MB.")
+    max_size = 30 * 1024 * 1024  # 30MB
+    if str(value).endswith(".mp4"):
+        if value.size > max_size:
+            raise ValidationError("Hông được đăng video quá 30MB !")
 
 
 class ProductVideos(models.Model):
     url_video = CloudinaryField(resource_type='video', allowed_formats=['mp4', 'webm'],
-                                validators=[validate_video_size])
+                                validators=[validate_video_size], blank=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE, default=None)
 
 
@@ -110,10 +111,9 @@ class ProductInfo(models.Model):
 
 
 class ProductSell(models.Model):
-    sold_quantity = models.IntegerField(null=False)
-    insurrance = models.DateTimeField(null=True, default=None)
-    percent_sale = models.IntegerField()
-    rating = models.FloatField(null=False)
+    sold_quantity = models.IntegerField(null=False, default=0)
+    percent_sale = models.IntegerField(default=0)
+    rating = models.FloatField(null=False, default=0)
     product = models.ForeignKey(Product, on_delete=models.CASCADE, default=None)
 
 
@@ -126,23 +126,31 @@ class PaymentMethod(models.Model):
     name = models.CharField(max_length=30)
 
 
-class Condition(models.Model):
-    order_fee_min = models.FloatField()
-    voucher_sale_max = models.FloatField()
-    time_usable = models.DateTimeField()
-    time_expired = models.DateTimeField()
-
-
 class VoucherType(models.Model):
     name = models.CharField(max_length=30, unique=True, null=False)
     key = models.CharField(max_length=10, unique=True, null=False)
 
 
 class Voucher(BaseModel):
-    name = models.CharField(max_length=30)
+    name = models.CharField(max_length=100)
     code = models.CharField(max_length=10, unique=True, null=False)
     description = RichTextField()
-    condition = models.ForeignKey(Condition, on_delete=models.PROTECT)
+    all_time_used = models.IntegerField(default=0)
+
+
+class VoucherCondition(models.Model):
+    order_fee_min = models.FloatField(default=0)
+    voucher_sale = models.FloatField(default=0)
+    voucher_sale_max = models.FloatField(default=0)
+    time_usable = models.DateTimeField()
+    time_expired = models.DateTimeField()
+    voucher = models.ForeignKey(Voucher, on_delete=models.CASCADE, default=None)
+
+
+class User_Voucher(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, default=None)
+    voucher = models.ForeignKey(Voucher, on_delete=models.CASCADE, default=None)
+    time_used = models.IntegerField(default=0)
 
 
 class Order(models.Model):
