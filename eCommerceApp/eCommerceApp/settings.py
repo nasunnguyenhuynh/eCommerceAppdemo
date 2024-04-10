@@ -10,6 +10,11 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from pathlib import Path
 import cloudinary
 
@@ -89,7 +94,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'ecommerceapp',
         'USER': 'root',
-        'PASSWORD': 'root',
+        'PASSWORD': 'Admin@123',
         'HOST': '',
     }
 }
