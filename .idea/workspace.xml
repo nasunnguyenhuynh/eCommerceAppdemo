@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="f8aae7f5-1761-47f4-98f0-8cb0dcfde433" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/eCommerceApp.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/eCommerceApp.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/eCommerceApp/eCommerceApp/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/eCommerceApp/eCommerceApp/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eCommerceApp/ecommerce/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/eCommerceApp/ecommerce/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eCommerceApp/ecommerce/migrations/0001_initial.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/eCommerceApp/ecommerce/migrations/0002_alter_user_managers_category_active.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/eCommerceApp/ecommerce/migrations/0003_remove_userdetails_email_and_more.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/eCommerceApp/ecommerce/migrations/0004_alter_user_user_details.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/eCommerceApp/ecommerce/migrations/0005_alter_user_managers_alter_user_shop.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/eCommerceApp/ecommerce/migrations/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/eCommerceApp/ecommerce/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/eCommerceApp/ecommerce/models.py" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="FormatOnSaveOptions">
+    <option name="myRunOnSave" value="true" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 5
+}</component>
+  <component name="ProjectId" id="2eqDncL2XCTXlNEdDFIe64dWCF0" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "D:/Clone app/cnpm",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="f8aae7f5-1761-47f4-98f0-8cb0dcfde433" name="Changes" comment="" />
+      <created>1712623382454</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1712623382454</updated>
+      <workItem from="1712623383713" duration="191000" />
+      <workItem from="1712623599682" duration="16315000" />
+      <workItem from="1712649775278" duration="4209000" />
+      <workItem from="1712654091281" duration="3306000" />
+      <workItem from="1712657462608" duration="407000" />
+      <workItem from="1712657882520" duration="696000" />
+      <workItem from="1712658599261" duration="148000" />
+      <workItem from="1712658755851" duration="182000" />
+      <workItem from="1712659000650" duration="12382000" />
+      <workItem from="1712674035547" duration="4549000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>

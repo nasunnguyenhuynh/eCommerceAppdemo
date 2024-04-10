@@ -11,6 +11,13 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+import cloudinary
+
+cloudinary.config(
+    cloud_name="diwxda8bi",
+    api_key="358748635141677",
+    api_secret="QBGsplvCUjvxqZFWkpQBWKFT91I"
+)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,7 +30,7 @@ CKEDITOR_UPLOAD_PATH = "ckeditors/images/"
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-qf)xyu3+q#a9=wx8m=ryv^dl^4-8k3x$2n3e)&tm^nh_%%7@9#'
+SECRET_KEY = 'django-insecure-qf)xyu3+q#a9=wx8m=r(Y(HDHU(D(DA))&tm^nh_%%7@9#'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -39,7 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'ecommerce.apps.EcommerceConfig',
+    'ecommerce',
     'ckeditor',
     'ckeditor_uploader',
 ]

@@ -1,11 +1,9 @@
+from enum import unique
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from ckeditor.fields import RichTextField
 from cloudinary.models import CloudinaryField
-from django.contrib.auth.models import (
-    BaseUserManager, AbstractBaseUser
-)
-from datetime import datetime
 
 
 # class CustomUserManager(BaseUserManager):
@@ -34,9 +32,9 @@ from datetime import datetime
 class User(AbstractUser):
     avatar = CloudinaryField(null=True)
     is_vendor = models.BooleanField(default=False)
-    user_details = models.ForeignKey('UserDetails', on_delete=models.PROTECT, default=1)
-    shop = models.ForeignKey('Shop', on_delete=models.PROTECT, null=True)
-    
+    birthday = models.DateTimeField(null=True)
+    phone = models.CharField(max_length=10, null=False, unique=True)
+
     # objects = CustomUserManager()
 
 
@@ -51,23 +49,6 @@ class BaseModel(models.Model):
         ordering = ['-id']
 
 
-class Shop(BaseModel):
-    name = models.CharField(max_length=100)
-    following = models.IntegerField(default=0)
-    followed = models.IntegerField(default=0)
-    rating = models.FloatField(null=False)
-
-
-class UserDetails(models.Model):
-    birthday = models.DateTimeField(null=False)
-    phone = models.CharField(max_length=10, null=False)
-
-
-class UserAddresses(models.Model):
-    address = models.CharField(max_length=100, null=False)
-    user_details = models.ForeignKey(UserDetails, on_delete=models.CASCADE)
-
-
 class Category(models.Model):
     name = models.CharField(max_length=50)
     active = models.BooleanField(default=True)
@@ -76,22 +57,43 @@ class Category(models.Model):
         return self.name
 
 
+class Shop(BaseModel):
+    name = models.CharField(max_length=100)
+    following = models.IntegerField(default=0)
+    followed = models.IntegerField(default=0)
+    rating = models.FloatField(null=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+
+
+class Product(BaseModel):
+    name = models.CharField(max_length=150)
+    price = models.FloatField(null=False)
+    shop = models.ForeignKey(Shop, on_delete=models.CASCADE, null=False)
+    category = models.ForeignKey(Category, on_delete=models.PROTECT, null=False, default=None)
+
+
+class UserAddresses(models.Model):
+    address = models.CharField(max_length=100, null=False)
+    user_details = models.ForeignKey(User, on_delete=models.CASCADE)
+
+
 class ProductImagesColors(models.Model):
     name_color = models.CharField(max_length=50)
     url_image = CloudinaryField(null=True)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, default=None)
 
 
 class ProductVideos(models.Model):
     url_video = CloudinaryField(null=True)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, default=None)
 
 
 class ProductInfo(models.Model):
     origin = models.CharField(max_length=50)
     material = models.CharField(max_length=100)
     description = RichTextField(null=True)
-    manufactory = models.CharField(max_length=255)
-    images_colors = models.ManyToManyField(ProductImagesColors)
-    videos = models.ManyToManyField(ProductVideos)
+    manufacture = models.CharField(max_length=255)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, default=None)
 
 
 class ProductSell(models.Model):
@@ -99,14 +101,7 @@ class ProductSell(models.Model):
     insurrance = models.DateTimeField(null=True, default=None)
     percent_sale = models.IntegerField()
     rating = models.FloatField(null=False)
-
-
-class Product(BaseModel):
-    name = models.CharField(max_length=150)
-    category = models.ForeignKey(Category, on_delete=models.PROTECT)
-    product_info = models.ForeignKey(ProductInfo, on_delete=models.PROTECT)
-    shop = models.ForeignKey(Shop, on_delete=models.CASCADE)
-    price = models.FloatField(null=False)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, default=None)
 
 
 class ShippingMethod(models.Model):
