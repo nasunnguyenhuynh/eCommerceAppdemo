@@ -135,7 +135,8 @@ class Voucher(BaseModel):
     name = models.CharField(max_length=100)
     code = models.CharField(max_length=10, unique=True, null=False)
     description = RichTextField()
-    all_time_used = models.IntegerField(default=0)
+    maximum_time_used = models.IntegerField(default=0)
+    voucher_type = models.ForeignKey(VoucherType, on_delete=models.CASCADE, default=None)
 
 
 class VoucherCondition(models.Model):

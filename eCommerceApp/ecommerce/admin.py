@@ -5,7 +5,7 @@ from ckeditor_uploader.widgets import CKEditorUploadingWidget
 from django.utils.html import mark_safe
 from django.contrib.auth.admin import UserAdmin
 from .models import Category, User, Product, Shop, ProductInfo, ProductImageDetail, ProductImagesColors, ProductVideos, \
-    ProductSell, Voucher, VoucherCondition
+    ProductSell, Voucher, VoucherCondition, VoucherType
 
 
 class CategoryAdmin(admin.ModelAdmin):
@@ -135,14 +135,26 @@ class ProductVideosAdmin(admin.ModelAdmin):
             return mark_safe(f"<img width='200' height='200' src='{product.url_video.url}' />")
 
 
+# class VoucherTypeInline(admin.StackedInline):
+#     model = VoucherType
+#     extra = 1
+#     max_num = 1
+
+
 class VoucherConditionInline(admin.StackedInline):
     model = VoucherCondition
     extra = 1
     max_num = 1
 
 
+class VoucherTypeAdmin(admin.ModelAdmin):
+    list_display = ['id', 'name', 'key']
+    search_fields = ['id', 'name', 'key']
+    list_filter = ['name']
+
+
 class VoucherAdmin(admin.ModelAdmin):
-    list_display = ['id', 'my_image', 'name', 'code', 'all_time_used', 'description', 'active']
+    list_display = ['id', 'my_image', 'name', 'code', 'maximum_time_used', 'description', 'active']
     search_fields = ['id', 'name', 'code']
     list_filter = ['name']
 
@@ -168,5 +180,6 @@ admin.site.register(ProductInfo, ProductInfoAdmin)
 admin.site.register(ProductImageDetail, ProductImageDetailAdmin)
 admin.site.register(ProductImagesColors, ProductImagesColorsAdmin)
 admin.site.register(ProductVideos, ProductVideosAdmin)
+admin.site.register(VoucherType, VoucherTypeAdmin)
 admin.site.register(Voucher, VoucherAdmin)
 admin.site.register(VoucherCondition, VoucherConditionAdmin)
