@@ -42,8 +42,11 @@ class Shop(BaseModel):
     name = models.CharField(max_length=100)
     following = models.IntegerField(default=0)
     followed = models.IntegerField(default=0)
-    rating = models.FloatField(null=True)
+    rating = models.FloatField(null=True, default=0)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+
+    def __str__(self):
+        return f"{self.id}/ {self.name}"
 
 
 class Product(BaseModel):
@@ -159,6 +162,9 @@ class CommentAndRating(models.Model):
 
 class StatusConfirmationShop(models.Model):
     status_content = models.CharField(max_length=100, null=True)
+
+    def __str__(self):
+        return self.status_content
 
 
 class ConfirmationShop(models.Model):

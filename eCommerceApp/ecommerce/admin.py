@@ -51,29 +51,6 @@ class CustomGroupAdmin(admin.ModelAdmin):
         return False
 
 
-class AdminGroupManager(admin.ModelAdmin):
-
-    def has_view_permission(self, request, obj=None):
-        if request.user.is_superuser:
-            return True
-        return False
-
-    def has_add_permission(self, request):
-        if request.user.is_superuser:
-            return True
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        if request.user.is_superuser:
-            return True
-        return False
-
-    def has_delete_permission(self, request, obj=None):
-        if request.user.is_superuser:
-            return True
-        return False
-
-
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ['id', 'name', 'active']
     search_fields = ['id', 'name']
@@ -105,7 +82,7 @@ class CategoryAdmin(admin.ModelAdmin):
         return False
 
 
-class CustomUserAdmin(admin.ModelAdmin):
+class CustomUserAdmin(BasePermissionChecker, admin.ModelAdmin):
     list_display = ['id', 'username', 'email', 'phone', 'birthday', 'is_active', 'is_vendor',
                     'is_superuser',
                     'my_image']
@@ -116,7 +93,8 @@ class CustomUserAdmin(admin.ModelAdmin):
         (None, {'fields': ('username', 'avatar', 'password')}),
         ('Login info', {'fields': ('date_joined', 'last_login')}),
         ('Personal info', {'fields': ('first_name', 'last_name', 'email', 'birthday', 'phone')}),
-        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+        ('Permissions',
+         {'fields': ('is_active', 'is_staff', 'is_superuser', 'is_vendor', 'groups', 'user_permissions')}),
     )
 
     def my_image(self, user):
@@ -135,38 +113,23 @@ class CustomUserAdmin(admin.ModelAdmin):
                 super().save_model(request, obj, form, change)
 
     def has_view_permission(self, request, obj=None):
-        if (request.user.groups.filter(
-                name='USER_MANAGER').exists() and "ecommerce.view_user" in request.user.get_user_permissions()
-                or request.user.is_superuser):
-            return True
-        return False
+        return self.has_permission(request, 'USER_MANAGER', 'view')
 
     def has_add_permission(self, request):
-        if (request.user.groups.filter(
-                name='USER_MANAGER').exists() and "ecommerce.add_user" in request.user.get_user_permissions()
-                or request.user.is_superuser):
-            return True
-        return False
+        return self.has_permission(request, 'USER_MANAGER', 'add')
 
     def has_change_permission(self, request, obj=None):
-        if (request.user.groups.filter(
-                name='USER_MANAGER').exists() and "ecommerce.change_user" in request.user.get_user_permissions()
-                or request.user.is_superuser):
-            return True
-        return False
+        return self.has_permission(request, 'USER_MANAGER', 'change')
 
     def has_delete_permission(self, request, obj=None):
-        if (request.user.groups.filter(
-                name='USER_MANAGER').exists() and "ecommerce.delete_user" in request.user.get_user_permissions()
-                or request.user.is_superuser):
-            return True
-        return False
+        return self.has_permission(request, 'USER_MANAGER', 'delete')
 
 
-class ShopAdmin(BasePermissionChecker, AdminGroupManager):
+class ShopAdmin(BasePermissionChecker, admin.ModelAdmin):
     list_display = ['id', 'name', 'following', 'followed', 'rating', 'user_id', 'my_image', 'active']
     search_fields = ['id', 'name']
     list_filter = ['active', 'rating']
+    readonly_fields = ['following', 'followed', 'rating', 'user_id', 'user']
 
     def my_image(self, shop):
         if shop.img:
@@ -174,6 +137,18 @@ class ShopAdmin(BasePermissionChecker, AdminGroupManager):
 
     def has_view_permission(self, request, obj=None):
         return self.has_permission(request, 'SHOP_MANAGER', 'view')
+
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+
+        shop = Shop.objects.filter(user_id=request.user.id)
+        if request.user.groups.filter(name="VENDOR_MANAGER").exists() and shop:
+            # Lấy queryset mặc định
+            queryset = queryset.filter(user=request.user)
+
+            return queryset
+
+        return queryset
 
     def has_add_permission(self, request):
         return self.has_permission(request, 'SHOP_MANAGER', 'add')
@@ -213,15 +188,23 @@ class ProductSellInline(admin.StackedInline):
     model = ProductSell
     extra = 1
     max_num = 1
+    readonly_fields = ['sold_quantity', 'rating']
 
 
-class ProductAdmin(BasePermissionChecker, AdminGroupManager):
+class ProductAdmin(BasePermissionChecker, admin.ModelAdmin):
     list_display = ['id', 'name', 'price', 'shop_id', 'category_name', 'my_image', 'active']
     search_fields = ['id', 'name']
     list_filter = ['category_id', 'shop_id', 'price']
 
+    readonly_fields = ['shop']
+
     inlines = [ProductInfoInline, ProductImageDetailInline, ProductImagesColorInline, ProductVideosInline,
                ProductSellInline]
+
+    def save_model(self, request, obj, form, change):
+        # Lấy shop từ người dùng hiện tại
+        obj.shop = Shop.objects.get(user_id=request.user.id)
+        super().save_model(request, obj, form, change)
 
     def my_image(self, product):
         if product.img:
@@ -234,6 +217,18 @@ class ProductAdmin(BasePermissionChecker, AdminGroupManager):
     def has_view_permission(self, request, obj=None):
         return self.has_permission(request, 'PRODUCT_MANAGER', 'view')
 
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+
+        shop = Shop.objects.filter(user_id=request.user.id)
+        if request.user.groups.filter(name="VENDOR_MANAGER").exists() and shop:
+            # Lấy queryset mặc định
+            queryset = queryset.filter(shop__user=request.user)
+
+            return queryset
+
+        return queryset
+
     def has_add_permission(self, request):
         return self.has_permission(request, 'PRODUCT_MANAGER', 'add')
 
@@ -244,7 +239,7 @@ class ProductAdmin(BasePermissionChecker, AdminGroupManager):
         return self.has_permission(request, 'PRODUCT_MANAGER', 'delete')
 
 
-class ProductInfoAdmin(BasePermissionChecker, AdminGroupManager):
+class ProductInfoAdmin(BasePermissionChecker, admin.ModelAdmin):
     list_display = ['id', 'product_id', 'product_name', 'origin', 'material', 'manufacture']
     search_fields = ['id', 'manufacture']
     list_filter = ['origin', 'material', 'manufacture']
@@ -265,7 +260,7 @@ class ProductInfoAdmin(BasePermissionChecker, AdminGroupManager):
         return self.has_permission(request, 'PRODUCTINFO_MANAGER', 'delete')
 
 
-class ProductImageDetailAdmin(AdminGroupManager):
+class ProductImageDetailAdmin(BasePermissionChecker, admin.ModelAdmin):
     list_display = ['id', 'product_id', 'my_image']
     search_fields = ['id', 'product_id']
     list_filter = ['product_id']
@@ -274,8 +269,20 @@ class ProductImageDetailAdmin(AdminGroupManager):
         if product.image:
             return mark_safe(f"<img width='200' height='200' src='{product.image.url}' />")
 
+    def has_view_permission(self, request, obj=None):
+        return self.has_permission(request, 'PRODUCTIMAGEDETAIL_MANAGER', 'view')
 
-class ProductImagesColorsAdmin(AdminGroupManager):
+    def has_add_permission(self, request):
+        return self.has_permission(request, 'PRODUCTIMAGEDETAIL_MANAGER', 'add')
+
+    def has_change_permission(self, request, obj=None):
+        return self.has_permission(request, 'PRODUCTIMAGEDETAIL_MANAGER', 'change')
+
+    def has_delete_permission(self, request, obj=None):
+        return self.has_permission(request, 'PRODUCTIMAGEDETAIL_MANAGER', 'delete')
+
+
+class ProductImagesColorsAdmin(BasePermissionChecker, admin.ModelAdmin):
     list_display = ['id', 'product_id', 'name_color', 'my_image']
     search_fields = ['id', 'name_color']
     list_filter = ['product_id']
@@ -284,8 +291,20 @@ class ProductImagesColorsAdmin(AdminGroupManager):
         if product.url_image:
             return mark_safe(f"<img width='200' height='200' src='{product.url_image.url}' />")
 
+    def has_view_permission(self, request, obj=None):
+        return self.has_permission(request, 'PRODUCTIMAGESCOLORS_MANAGER', 'view')
 
-class ProductVideosAdmin(AdminGroupManager):
+    def has_add_permission(self, request):
+        return self.has_permission(request, 'PRODUCTIMAGESCOLORS_MANAGER', 'add')
+
+    def has_change_permission(self, request, obj=None):
+        return self.has_permission(request, 'PRODUCTIMAGESCOLORS_MANAGER', 'change')
+
+    def has_delete_permission(self, request, obj=None):
+        return self.has_permission(request, 'PRODUCTIMAGESCOLORS_MANAGER', 'delete')
+
+
+class ProductVideosAdmin(BasePermissionChecker, admin.ModelAdmin):
     list_display = ['id', 'product_id', 'my_video']
     search_fields = ['id']
     list_filter = ['product_id']
@@ -294,6 +313,18 @@ class ProductVideosAdmin(AdminGroupManager):
         if product.url_video:
             return mark_safe(f"<img width='200' height='200' src='{product.url_video.url}' />")
 
+    def has_view_permission(self, request, obj=None):
+        return self.has_permission(request, 'PRODUCTVIDEOS_MANAGER', 'view')
+
+    def has_add_permission(self, request):
+        return self.has_permission(request, 'PRODUCTVIDEOS_MANAGER', 'add')
+
+    def has_change_permission(self, request, obj=None):
+        return self.has_permission(request, 'PRODUCTVIDEOS_MANAGER', 'change')
+
+    def has_delete_permission(self, request, obj=None):
+        return self.has_permission(request, 'PRODUCTVIDEOS_MANAGER', 'delete')
+
 
 class VoucherConditionInline(admin.StackedInline):
     model = VoucherCondition
@@ -301,7 +332,7 @@ class VoucherConditionInline(admin.StackedInline):
     max_num = 1
 
 
-class VoucherTypeAdmin(BasePermissionChecker, AdminGroupManager):
+class VoucherTypeAdmin(BasePermissionChecker, admin.ModelAdmin):
     list_display = ['id', 'name', 'key']
     search_fields = ['id', 'name', 'key']
     list_filter = ['name']
@@ -319,7 +350,7 @@ class VoucherTypeAdmin(BasePermissionChecker, AdminGroupManager):
         return self.has_permission(request, 'VOUCHERTYPE_MANAGER', 'delete')
 
 
-class VoucherAdmin(BasePermissionChecker, AdminGroupManager):
+class VoucherAdmin(BasePermissionChecker, admin.ModelAdmin):
     list_display = ['id', 'my_image', 'name', 'code', 'maximum_time_used', 'description', 'active']
     search_fields = ['id', 'name', 'code']
     list_filter = ['name']
@@ -343,7 +374,7 @@ class VoucherAdmin(BasePermissionChecker, AdminGroupManager):
         return self.has_permission(request, 'VOUCHER_MANAGER', 'delete')
 
 
-class VoucherConditionAdmin(BasePermissionChecker, AdminGroupManager):
+class VoucherConditionAdmin(BasePermissionChecker, admin.ModelAdmin):
     list_display = ['id', 'voucher_id', 'order_fee_min', 'voucher_sale', 'voucher_sale_max', 'time_usable',
                     'time_expired']
     search_fields = ['id', 'time_usable', 'time_expired']
@@ -362,7 +393,7 @@ class VoucherConditionAdmin(BasePermissionChecker, AdminGroupManager):
         return self.has_permission(request, 'VOUCHERCONDITION_MANAGER', 'delete')
 
 
-class StatusConfirmationShopAdmin(BasePermissionChecker, AdminGroupManager):
+class StatusConfirmationShopAdmin(BasePermissionChecker, admin.ModelAdmin):
     list_display = ['id', 'status_content']
     search_fields = ['id', 'status_content']
     list_filter = ['status_content']
