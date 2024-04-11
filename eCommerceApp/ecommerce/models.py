@@ -7,36 +7,11 @@ from cloudinary.models import CloudinaryField
 from django.core.exceptions import ValidationError
 
 
-# class CustomUserManager(BaseUserManager):
-#     def create_superuser(self, email, password=None, **extra_fields):
-#         """
-#         Creates and saves a superuser with the given email, date of
-#         birth and password.
-#         :param email:
-#         :param password:
-#         :param **extra_fields:
-#         """
-#
-#         user_details = UserDetails(firstname='admin', lastname='admin', birthday=datetime.now())
-#         user_details.save(using=self._db)
-#
-#         user = self.create_user(
-#             email,
-#             password=password,
-#             user_details=user_details,
-#             **extra_fields)
-#         user.is_admin = True
-#         user.save(using=self._db)
-#         return user
-#
-
 class User(AbstractUser):
     avatar = CloudinaryField(null=True)
     is_vendor = models.BooleanField(default=False)
     birthday = models.DateTimeField(null=True)
     phone = models.CharField(max_length=10, null=False, unique=True)
-
-    # objects = CustomUserManager()
 
 
 class UserAddresses(models.Model):

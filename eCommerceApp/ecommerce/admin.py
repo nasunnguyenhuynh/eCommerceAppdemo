@@ -8,6 +8,18 @@ from .models import Category, User, Product, Shop, ProductInfo, ProductImageDeta
     ProductSell, Voucher, VoucherCondition, VoucherType, ConfirmationShop, StatusConfirmationShop
 from django.contrib.auth.models import Group
 
+APP_NAME = "ecommerce"
+
+
+class BasePermissionChecker:
+    @staticmethod
+    def has_permission(request, group_name, method):
+        if (request.user.groups.filter(name=group_name).exists()
+                and f"{APP_NAME}.{method}_{group_name[:-8].lower()}" in request.user.get_user_permissions()
+                or request.user.is_superuser):
+            return True
+        return False
+
 
 class CustomGroupAdmin(admin.ModelAdmin):
     def has_view_permission(self, request, obj=None):
@@ -151,7 +163,7 @@ class CustomUserAdmin(admin.ModelAdmin):
         return False
 
 
-class ShopAdmin(AdminGroupManager):
+class ShopAdmin(BasePermissionChecker, AdminGroupManager):
     list_display = ['id', 'name', 'following', 'followed', 'rating', 'user_id', 'my_image', 'active']
     search_fields = ['id', 'name']
     list_filter = ['active', 'rating']
@@ -161,32 +173,16 @@ class ShopAdmin(AdminGroupManager):
             return mark_safe(f"<img width='200' height='200' src='{shop.img.url}' />")
 
     def has_view_permission(self, request, obj=None):
-        if (request.user.groups.filter(
-                name='SHOP_MANAGER').exists() and "ecommerce.view_shop" in request.user.get_user_permissions()
-                or request.user.is_superuser):
-            return True
-        return False
+        return self.has_permission(request, 'SHOP_MANAGER', 'view')
 
     def has_add_permission(self, request):
-        if (request.user.groups.filter(
-                name='SHOP_MANAGER').exists() and "ecommerce.add_shop" in request.user.get_user_permissions()
-                or request.user.is_superuser):
-            return True
-        return False
+        return self.has_permission(request, 'SHOP_MANAGER', 'add')
 
     def has_change_permission(self, request, obj=None):
-        if (request.user.groups.filter(
-                name='SHOP_MANAGER').exists() and "ecommerce.change_shop" in request.user.get_user_permissions()
-                or request.user.is_superuser):
-            return True
-        return False
+        return self.has_permission(request, 'SHOP_MANAGER', 'change')
 
     def has_delete_permission(self, request, obj=None):
-        if (request.user.groups.filter(
-                name='SHOP_MANAGER').exists() and "ecommerce.delete_shop" in request.user.get_user_permissions()
-                or request.user.is_superuser):
-            return True
-        return False
+        return self.has_permission(request, 'SHOP_MANAGER', 'delete')
 
 
 class ProductInfoInline(admin.StackedInline):  # Hoặc InlineModelAdmin tùy thuộc vào giao diện bạn muốn
@@ -219,7 +215,7 @@ class ProductSellInline(admin.StackedInline):
     max_num = 1
 
 
-class ProductAdmin(AdminGroupManager):
+class ProductAdmin(BasePermissionChecker, AdminGroupManager):
     list_display = ['id', 'name', 'price', 'shop_id', 'category_name', 'my_image', 'active']
     search_fields = ['id', 'name']
     list_filter = ['category_id', 'shop_id', 'price']
@@ -236,35 +232,19 @@ class ProductAdmin(AdminGroupManager):
         return category.name
 
     def has_view_permission(self, request, obj=None):
-        if (request.user.groups.filter(
-                name='PRODUCT_MANAGER').exists() and "ecommerce.view_product" in request.user.get_user_permissions()
-                or request.user.is_superuser):
-            return True
-        return False
+        return self.has_permission(request, 'PRODUCT_MANAGER', 'view')
 
     def has_add_permission(self, request):
-        if (request.user.groups.filter(
-                name='PRODUCT_MANAGER').exists() and "ecommerce.add_product" in request.user.get_user_permissions()
-                or request.user.is_superuser):
-            return True
-        return False
+        return self.has_permission(request, 'PRODUCT_MANAGER', 'add')
 
     def has_change_permission(self, request, obj=None):
-        if (request.user.groups.filter(
-                name='PRODUCT_MANAGER').exists() and "ecommerce.change_product" in request.user.get_user_permissions()
-                or request.user.is_superuser):
-            return True
-        return False
+        return self.has_permission(request, 'PRODUCT_MANAGER', 'change')
 
     def has_delete_permission(self, request, obj=None):
-        if (request.user.groups.filter(
-                name='PRODUCT_MANAGER').exists() and "ecommerce.delete_product" in request.user.get_user_permissions()
-                or request.user.is_superuser):
-            return True
-        return False
+        return self.has_permission(request, 'PRODUCT_MANAGER', 'delete')
 
 
-class ProductInfoAdmin(AdminGroupManager):
+class ProductInfoAdmin(BasePermissionChecker, AdminGroupManager):
     list_display = ['id', 'product_id', 'product_name', 'origin', 'material', 'manufacture']
     search_fields = ['id', 'manufacture']
     list_filter = ['origin', 'material', 'manufacture']
@@ -273,32 +253,16 @@ class ProductInfoAdmin(AdminGroupManager):
         return obj.product.name
 
     def has_view_permission(self, request, obj=None):
-        if (request.user.groups.filter(
-                name='PRODUCT_MANAGER').exists() and "ecommerce.view_product_info" in request.user.get_user_permissions()
-                or request.user.is_superuser):
-            return True
-        return False
+        return self.has_permission(request, 'PRODUCTINFO_MANAGER', 'view')
 
     def has_add_permission(self, request):
-        if (request.user.groups.filter(
-                name='PRODUCT_MANAGER').exists() and "ecommerce.add_product_info" in request.user.get_user_permissions()
-                or request.user.is_superuser):
-            return True
-        return False
+        return self.has_permission(request, 'PRODUCTINFO_MANAGER', 'add')
 
     def has_change_permission(self, request, obj=None):
-        if (request.user.groups.filter(
-                name='PRODUCT_MANAGER').exists() and "ecommerce.change_product_info" in request.user.get_user_permissions()
-                or request.user.is_superuser):
-            return True
-        return False
+        return self.has_permission(request, 'PRODUCTINFO_MANAGER', 'change')
 
     def has_delete_permission(self, request, obj=None):
-        if (request.user.groups.filter(
-                name='PRODUCT_MANAGER').exists() and "ecommerce.delete_product_info " in request.user.get_user_permissions()
-                or request.user.is_superuser):
-            return True
-        return False
+        return self.has_permission(request, 'PRODUCTINFO_MANAGER', 'delete')
 
 
 class ProductImageDetailAdmin(AdminGroupManager):
@@ -337,13 +301,25 @@ class VoucherConditionInline(admin.StackedInline):
     max_num = 1
 
 
-class VoucherTypeAdmin(AdminGroupManager):
+class VoucherTypeAdmin(BasePermissionChecker, AdminGroupManager):
     list_display = ['id', 'name', 'key']
     search_fields = ['id', 'name', 'key']
     list_filter = ['name']
 
+    def has_view_permission(self, request, obj=None):
+        return self.has_permission(request, 'VOUCHERTYPE_MANAGER', 'view')
 
-class VoucherAdmin(AdminGroupManager):
+    def has_add_permission(self, request):
+        return self.has_permission(request, 'VOUCHERTYPE_MANAGER', 'add')
+
+    def has_change_permission(self, request, obj=None):
+        return self.has_permission(request, 'VOUCHERTYPE_MANAGER', 'change')
+
+    def has_delete_permission(self, request, obj=None):
+        return self.has_permission(request, 'VOUCHERTYPE_MANAGER', 'delete')
+
+
+class VoucherAdmin(BasePermissionChecker, AdminGroupManager):
     list_display = ['id', 'my_image', 'name', 'code', 'maximum_time_used', 'description', 'active']
     search_fields = ['id', 'name', 'code']
     list_filter = ['name']
@@ -355,77 +331,56 @@ class VoucherAdmin(AdminGroupManager):
             return mark_safe(f"<img width='100' height='100' src='{voucher.img.url}' />")
 
     def has_view_permission(self, request, obj=None):
-        if (request.user.groups.filter(
-                name='VOUCHER_MANAGER').exists() and "ecommerce.view_voucher" in request.user.get_user_permissions()
-                or request.user.is_superuser):
-            return True
-        return False
+        return self.has_permission(request, 'VOUCHER_MANAGER', 'view')
 
     def has_add_permission(self, request):
-        if (request.user.groups.filter(
-                name='VOUCHER_MANAGER').exists() and "ecommerce.add_voucher" in request.user.get_user_permissions()
-                or request.user.is_superuser):
-            return True
-        return False
+        return self.has_permission(request, 'VOUCHER_MANAGER', 'add')
 
     def has_change_permission(self, request, obj=None):
-        if (request.user.groups.filter(
-                name='VOUCHER_MANAGER').exists() and "ecommerce.change_voucher" in request.user.get_user_permissions()
-                or request.user.is_superuser):
-            return True
-        return False
+        return self.has_permission(request, 'VOUCHER_MANAGER', 'change')
 
     def has_delete_permission(self, request, obj=None):
-        if (request.user.groups.filter(
-                name='VOUCHER_MANAGER').exists() and "ecommerce.delete_voucher" in request.user.get_user_permissions()
-                or request.user.is_superuser):
-            return True
-        return False
+        return self.has_permission(request, 'VOUCHER_MANAGER', 'delete')
 
 
-class VoucherConditionAdmin(AdminGroupManager):
+class VoucherConditionAdmin(BasePermissionChecker, AdminGroupManager):
     list_display = ['id', 'voucher_id', 'order_fee_min', 'voucher_sale', 'voucher_sale_max', 'time_usable',
                     'time_expired']
     search_fields = ['id', 'time_usable', 'time_expired']
     list_filter = ['id', 'order_fee_min', 'voucher_sale_max', 'time_usable', 'time_expired']
 
+    def has_view_permission(self, request, obj=None):
+        return self.has_permission(request, 'VOUCHERCONDITION_MANAGER', 'view')
 
-class StatusConfirmationShopAdmin(AdminGroupManager):
+    def has_add_permission(self, request):
+        return self.has_permission(request, 'VOUCHERCONDITION_MANAGER', 'add')
+
+    def has_change_permission(self, request, obj=None):
+        return self.has_permission(request, 'VOUCHERCONDITION_MANAGER', 'change')
+
+    def has_delete_permission(self, request, obj=None):
+        return self.has_permission(request, 'VOUCHERCONDITION_MANAGER', 'delete')
+
+
+class StatusConfirmationShopAdmin(BasePermissionChecker, AdminGroupManager):
     list_display = ['id', 'status_content']
     search_fields = ['id', 'status_content']
     list_filter = ['status_content']
 
     def has_view_permission(self, request, obj=None):
-        print(request.user.get_user_permissions())
-        if (request.user.groups.filter(
-                name='CONFIRMATION_SHOP_MANAGER').exists() and "ecommerce.view_statusconfirmationshop" in request.user.get_user_permissions()
-                or request.user.is_superuser):
-            return True
-        return False
+        return self.has_permission(request, 'STATUSCONFIRMATIONSHOP_MANAGER', 'view')
 
     def has_add_permission(self, request):
-        if (request.user.groups.filter(
-                name='CONFIRMATION_SHOP_MANAGER').exists() and "ecommerce.add_statusconfirmationshop" in request.user.get_user_permissions()
-                or request.user.is_superuser):
-            return True
-        return False
+        return self.has_permission(request, 'STATUSCONFIRMATIONSHOP_MANAGER', 'add')
 
     def has_change_permission(self, request, obj=None):
-        if (request.user.groups.filter(
-                name='CONFIRMATION_SHOP_MANAGER').exists() and "ecommerce.change_statusconfirmationshop" in request.user.get_user_permissions()
-                or request.user.is_superuser):
-            return True
-        return False
+        return self.has_permission(request, 'STATUSCONFIRMATIONSHOP_MANAGER', 'change')
 
     def has_delete_permission(self, request, obj=None):
-        if (request.user.groups.filter(
-                name='CONFIRMATION_SHOP_MANAGER').exists() and "ecommerce.delete_statusconfirmationshop" in request.user.get_user_permissions()
-                or request.user.is_superuser):
-            return True
-        return False
+        return self.has_permission(request, 'STATUSCONFIRMATIONSHOP_MANAGER', 'delete')
 
 
-class ConfirmationShopAdmin(admin.ModelAdmin):
+class ConfirmationShopAdmin(BasePermissionChecker, admin.ModelAdmin):
     list_display = ['id', 'citizen_identification_image1', 'avatar', 'username', 'birthday', 'phone', 'status_content1',
                     'note']
     search_fields = ['username', 'phone']
@@ -433,7 +388,6 @@ class ConfirmationShopAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ("Results", {'fields': ('status', 'note',)}),
-
     )
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
@@ -472,32 +426,16 @@ class ConfirmationShopAdmin(admin.ModelAdmin):
         return user.phone
 
     def has_view_permission(self, request, obj=None):
-        if (request.user.groups.filter(name='CONFIRMATION_SHOP_MANAGER').exists()
-                and "ecommerce.view_confirmationshop" in request.user.get_user_permissions()
-                or request.user.is_superuser):
-            return True
-        return False
+        return self.has_permission(request, 'CONFIRMATIONSHOP_MANAGER', 'view')
 
     def has_add_permission(self, request):
-        if (request.user.groups.filter(name='CONFIRMATION_SHOP_MANAGER').exists()
-                and "ecommerce.add_confirmationshop" in request.user.get_user_permissions()
-                or request.user.is_superuser):
-            return True
-        return False
+        return self.has_permission(request, 'CONFIRMATIONSHOP_MANAGER', 'add')
 
     def has_change_permission(self, request, obj=None):
-        if (request.user.groups.filter(name='CONFIRMATION_SHOP_MANAGER').exists()
-                and "ecommerce.change_confirmationshop" in request.user.get_user_permissions()
-                or request.user.is_superuser):
-            return True
-        return False
+        return self.has_permission(request, 'CONFIRMATIONSHOP_MANAGER', 'change')
 
     def has_delete_permission(self, request, obj=None):
-        if (request.user.groups.filter(name='CONFIRMATION_SHOP_MANAGER').exists()
-                and "ecommerce.delete_confirmationshop" in request.user.get_user_permissions()
-                or request.user.is_superuser):
-            return True
-        return False
+        return self.has_permission(request, 'CONFIRMATIONSHOP_MANAGER', 'delete')
 
 
 admin.site.register([User], CustomUserAdmin)
