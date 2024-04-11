@@ -6,15 +6,92 @@ from django.utils.html import mark_safe
 from django.contrib.auth.admin import UserAdmin
 from .models import Category, User, Product, Shop, ProductInfo, ProductImageDetail, ProductImagesColors, ProductVideos, \
     ProductSell, Voucher, VoucherCondition, VoucherType
+from django.contrib.auth.models import Group
 
 
-class CategoryAdmin(admin.ModelAdmin):
+class CustomGroupAdmin(admin.ModelAdmin):
+    def has_view_permission(self, request, obj=None):
+        # Kiểm tra nếu người dùng không phải là superuser
+        if not request.user.is_superuser:
+            # Nếu không phải là superuser, không cho phép xem bảng Group
+            return False
+        # Trả về giá trị mặc định nếu là superuser
+        return True
+
+    def has_add_permission(self, request):
+        if request.user.is_superuser:
+            return True
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        if request.user.is_superuser:
+            return True
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        if request.user.is_superuser:
+            return True
+        return False
+
+    def has_module_permission(self, request):
+        if request.user.is_superuser:
+            return True
+        return False
+
+
+class AdminGroupManager(admin.ModelAdmin):
+
+    def has_view_permission(self, request, obj=None):
+        if request.user.is_superuser:
+            return True
+        return False
+
+    def has_add_permission(self, request):
+        if request.user.is_superuser:
+            return True
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        if request.user.is_superuser:
+            return True
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        if request.user.is_superuser:
+            return True
+        return False
+
+
+class UserGroupManager(admin.ModelAdmin):
+
+    def has_view_permission(self, request, obj=None):
+        if request.user.groups.filter(name='USER_MANAGER').exists() and not request.user.is_superuser:
+            return True
+        return False
+
+    def has_add_permission(self, request):
+        if request.user.groups.filter(name='USER_MANAGER').exists() or request.user.is_superuser:
+            return True
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        if request.user.groups.filter(name='USER_MANAGER').exists() or request.user.is_superuser:
+            return True
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        if request.user.groups.filter(name='USER_MANAGER').exists() or request.user.is_superuser:
+            return True
+        return False
+
+
+class CategoryAdmin(AdminGroupManager):
     list_display = ['id', 'name', 'active']
     search_fields = ['id', 'name']
     list_filter = ['id', 'name']
 
 
-class CustomUserAdmin(admin.ModelAdmin):
+class CustomUserAdmin(UserGroupManager):
     list_display = ['id', 'username', 'email', 'phone', 'birthday', 'is_active', 'is_vendor',
                     'is_superuser',
                     'my_image']
@@ -39,7 +116,7 @@ class CustomUserAdmin(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
 
 
-class ShopAdmin(admin.ModelAdmin):
+class ShopAdmin(AdminGroupManager):
     list_display = ['id', 'name', 'following', 'followed', 'rating', 'user_id', 'my_image', 'active']
     search_fields = ['id', 'name']
     list_filter = ['active', 'rating']
@@ -79,7 +156,7 @@ class ProductSellInline(admin.StackedInline):
     max_num = 1
 
 
-class ProductAdmin(admin.ModelAdmin):
+class ProductAdmin(AdminGroupManager):
     list_display = ['id', 'name', 'price', 'shop_id', 'category_name', 'my_image', 'active']
     search_fields = ['id', 'name']
     list_filter = ['category_id', 'shop_id', 'price']
@@ -96,7 +173,7 @@ class ProductAdmin(admin.ModelAdmin):
         return category.name
 
 
-class ProductInfoAdmin(admin.ModelAdmin):
+class ProductInfoAdmin(AdminGroupManager):
     list_display = ['id', 'product_id', 'product_name', 'origin', 'material', 'manufacture']
     search_fields = ['id', 'manufacture']
     list_filter = ['origin', 'material', 'manufacture']
@@ -105,7 +182,7 @@ class ProductInfoAdmin(admin.ModelAdmin):
         return obj.product.name
 
 
-class ProductImageDetailAdmin(admin.ModelAdmin):
+class ProductImageDetailAdmin(AdminGroupManager):
     list_display = ['id', 'product_id', 'my_image']
     search_fields = ['id', 'product_id']
     list_filter = ['product_id']
@@ -115,7 +192,7 @@ class ProductImageDetailAdmin(admin.ModelAdmin):
             return mark_safe(f"<img width='200' height='200' src='{product.image.url}' />")
 
 
-class ProductImagesColorsAdmin(admin.ModelAdmin):
+class ProductImagesColorsAdmin(AdminGroupManager):
     list_display = ['id', 'product_id', 'name_color', 'my_image']
     search_fields = ['id', 'name_color']
     list_filter = ['product_id']
@@ -125,7 +202,7 @@ class ProductImagesColorsAdmin(admin.ModelAdmin):
             return mark_safe(f"<img width='200' height='200' src='{product.url_image.url}' />")
 
 
-class ProductVideosAdmin(admin.ModelAdmin):
+class ProductVideosAdmin(AdminGroupManager):
     list_display = ['id', 'product_id', 'my_video']
     search_fields = ['id']
     list_filter = ['product_id']
@@ -135,25 +212,19 @@ class ProductVideosAdmin(admin.ModelAdmin):
             return mark_safe(f"<img width='200' height='200' src='{product.url_video.url}' />")
 
 
-# class VoucherTypeInline(admin.StackedInline):
-#     model = VoucherType
-#     extra = 1
-#     max_num = 1
-
-
 class VoucherConditionInline(admin.StackedInline):
     model = VoucherCondition
     extra = 1
     max_num = 1
 
 
-class VoucherTypeAdmin(admin.ModelAdmin):
+class VoucherTypeAdmin(AdminGroupManager):
     list_display = ['id', 'name', 'key']
     search_fields = ['id', 'name', 'key']
     list_filter = ['name']
 
 
-class VoucherAdmin(admin.ModelAdmin):
+class VoucherAdmin(AdminGroupManager):
     list_display = ['id', 'my_image', 'name', 'code', 'maximum_time_used', 'description', 'active']
     search_fields = ['id', 'name', 'code']
     list_filter = ['name']
@@ -165,15 +236,15 @@ class VoucherAdmin(admin.ModelAdmin):
             return mark_safe(f"<img width='100' height='100' src='{voucher.img.url}' />")
 
 
-class VoucherConditionAdmin(admin.ModelAdmin):
+class VoucherConditionAdmin(AdminGroupManager):
     list_display = ['id', 'voucher_id', 'order_fee_min', 'voucher_sale', 'voucher_sale_max', 'time_usable',
                     'time_expired']
     search_fields = ['id', 'time_usable', 'time_expired']
     list_filter = ['id', 'order_fee_min', 'voucher_sale_max', 'time_usable', 'time_expired']
 
 
+admin.site.register([User], CustomUserAdmin)
 admin.site.register(Category, CategoryAdmin)
-admin.site.register(User, CustomUserAdmin)
 admin.site.register(Shop, ShopAdmin)
 admin.site.register(Product, ProductAdmin)
 admin.site.register(ProductInfo, ProductInfoAdmin)
@@ -183,3 +254,5 @@ admin.site.register(ProductVideos, ProductVideosAdmin)
 admin.site.register(VoucherType, VoucherTypeAdmin)
 admin.site.register(Voucher, VoucherAdmin)
 admin.site.register(VoucherCondition, VoucherConditionAdmin)
+admin.site.unregister(Group)
+admin.site.register(Group, CustomGroupAdmin)
