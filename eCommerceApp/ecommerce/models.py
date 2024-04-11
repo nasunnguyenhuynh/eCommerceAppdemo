@@ -180,3 +180,14 @@ class CommentAndRating(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     shop = models.ForeignKey(Shop, on_delete=models.CASCADE)
+
+
+class StatusConfirmationShop(models.Model):
+    status_content = models.CharField(max_length=100, null=True)
+
+
+class ConfirmationShop(models.Model):
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
+    citizen_identification_image = CloudinaryField()
+    status = models.ForeignKey(StatusConfirmationShop, on_delete=models.PROTECT)
+    note = RichTextField(default=None, null=True)
