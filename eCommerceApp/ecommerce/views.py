@@ -1,4 +1,10 @@
 from django.template import loader
+from .models import Category, User, Product, Shop, ProductInfo, ProductImageDetail, ProductImagesColors, ProductVideos, \
+    ProductSell, Voucher, VoucherCondition, VoucherType, ConfirmationShop, StatusConfirmationShop
+from rest_framework import viewsets, generics, status, parsers
+from . import serializers
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 
 def display(request):
@@ -45,13 +51,36 @@ def sign_out(request):
     del request.session['user_data']
     return redirect('sign_in')
 
+
 #################################
 
-# from rest_framework import viewsets, generics
+#
 # from .models import User, Place, Purpose, Meeting, GuestMeeting
-# from . import serializers
+#
 #
 #
 # class PlaceViewset(viewsets.ViewSet, generics.ListAPIView):
 #     queryset = Place.objects.all()
 #     serializer_class = serializers.PlaceSerializer
+
+
+########################################### View của darklord0710 ######################################################
+
+class UserViewSet(viewsets.ViewSet, generics.ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = serializers.UserSerializer
+
+    @action(methods=['get'], url_path='confirmationShop', detail=True)
+    def getConfirmatonShop(self, request, pk):
+        confirmationShops = self.get_object().confirmationshop_set.select_related('user')  # qh 1-1 mới nên join
+        return Response(serializers.ConfirmationShopSerializer(confirmationShops, many=True).data,
+                        status=status.HTTP_200_OK)
+
+
+class ProductViewSet(viewsets.ViewSet, generics.ListAPIView):
+    pass
+
+
+class ConfirmationShop(viewsets.ViewSet, generics.ListCreateAPIView):
+    queryset = ConfirmationShop.objects.all()
+    serializer_class = serializers.ConfirmationShopSerializer

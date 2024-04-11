@@ -1,9 +1,7 @@
-from cloudinary.models import CloudinaryField
 from django.contrib import admin
 from django import forms
 from ckeditor_uploader.widgets import CKEditorUploadingWidget
 from django.utils.html import mark_safe
-from django.contrib.auth.admin import UserAdmin
 from .models import Category, User, Product, Shop, ProductInfo, ProductImageDetail, ProductImagesColors, ProductVideos, \
     ProductSell, Voucher, VoucherCondition, VoucherType, ConfirmationShop, StatusConfirmationShop
 from django.contrib.auth.models import Group
@@ -194,7 +192,7 @@ class ProductSellInline(admin.StackedInline):
 class ProductAdmin(BasePermissionChecker, admin.ModelAdmin):
     list_display = ['id', 'name', 'price', 'shop_id', 'category_name', 'my_image', 'active']
     search_fields = ['id', 'name']
-    list_filter = ['category_id', 'shop_id', 'price']
+    list_filter = ['category_id', 'price']
 
     readonly_fields = ['shop']
 
