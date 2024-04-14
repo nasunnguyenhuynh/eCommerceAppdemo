@@ -10,7 +10,7 @@ Install necessary package (setuptools: for No module named pkg_resources Error)
 	pip install django, pymysql, cloudinary, pillow, django-ckeditor, djangorestframework, drf-yasg, django-oauth-toolkit
 Config and Login with Social Accounts
 
-	pip install django-allauth
+	pip install django-allauth, django_extensions
 Create cert and key
 
 	pip install Werkzeug, pyOpenSSL
@@ -21,6 +21,12 @@ Run migrate
 Create superuser
 	
 	python manage.py createsuperuser
+Run server
+
+ 	python manage.py runserver
+Show all URLs (Optional)
+
+	python manage.py show_urls
 Run localhost with HTTPS (Optional)
 	
 	python manage.py runserver_plus --cert-file cert.pem --key-file key.pem
