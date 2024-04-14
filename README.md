@@ -21,7 +21,7 @@ Run migrate
 Create superuser
 	
 	python manage.py createsuperuser
-Run localhost with HTTPS
+Run localhost with HTTPS (Optional)
 	
 	python manage.py runserver_plus --cert-file cert.pem --key-file key.pem
 $${\color{red}FB \space requires \space login \space with \space HTTPS}$$ <br/>
