@@ -24,11 +24,11 @@ Create superuser
 Run localhost with HTTPS
 	
 	python manage.py runserver_plus --cert-file cert.pem --key-file key.pem
->>> Notation: FB requires login with HTTPS <<<
->>> Insecure Login Block Solution
-<p>+ Use NgroK</p> 
-<p>+ Use Passport strategy</p>
-<p>+ Create cert.pem & key.perm</p>
+$${\color{red}FB \space requires \space login \space with \space HTTPS}$$ <br/>
+Insecure Login Block Solution:
+* Using NgroK
+* Using Passport strategy
+* Using cert.pem & key.perm
 
 <h1>Documentation</h1>
 <h2>Integrate Social Accounts</h2>
