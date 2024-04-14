@@ -56,9 +56,12 @@ INSTALLED_APPS = [
     'ckeditor',
     'ckeditor_uploader',
     'drf_yasg',
-    'oauth2_provider'
+    'oauth2_provider',
+    'corsheaders'
 
 ]
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -67,6 +70,8 @@ REST_FRAMEWORK = {
 }
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -151,5 +156,8 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CLIENT_ID = 'CdLY1uAK55c1aeqQkidSN6Nuh1EgDIcuecfHdoKH'
-CLIENT_SECRET = 'Y2S3hPPszElGyXvhFn4KrABbDDL4lL5sPdgRd4tPKYRooYzil6qyTdsuunwbJFQtdb0Yal1dxnD0KRCj8JoDdDjlnMN31DItQddAn1A6gZhnlfbe8qPMBbKjeZGXCNA7'
+# CLIENT_ID = 'CdLY1uAK55c1aeqQkidSN6Nuh1EgDIcuecfHdoKH'
+# CLIENT_SECRET = 'Y2S3hPPszElGyXvhFn4KrABbDDL4lL5sPdgRd4tPKYRooYzil6qyTdsuunwbJFQtdb0Yal1dxnD0KRCj8JoDdDjlnMN31DItQddAn1A6gZhnlfbe8qPMBbKjeZGXCNA7'
+
+CLIENT_ID = 'pdKVqpXyodpAHJFCYvGG1rO2TMzY8QqWGIn5TADA'
+CLIENT_SECRET = 'TTVwfLKnTHn71tww1tkJK3dlns8AVbeiHglPEzvIfqB36OzvVPjuDYVN3bZPioaNJnQcvmoFWaNVjhEUhgreCsRDJ7ISliEAWCYXienSNYIR8pvqliQ8RTYLo5684DAf'

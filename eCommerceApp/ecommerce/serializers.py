@@ -16,6 +16,14 @@ class UserSerializer(ModelSerializer):
         return rep
 
 
+class ShopSerializer(ModelSerializer):
+    user = UserSerializer()
+
+    class Meta:
+        model = Shop
+        fields = "__all__"
+
+
 class StatusConfirmationShop(ModelSerializer):
     class Meta:
         model = StatusConfirmationShop

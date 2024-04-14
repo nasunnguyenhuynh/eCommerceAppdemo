@@ -492,9 +492,9 @@ class ConfirmationShopAdmin(BasePermissionChecker, admin.ModelAdmin):
         queryset = super().get_queryset(request)
 
         confirmationshop = ConfirmationShop.objects.filter(user_id=request.user.id)
-        if confirmationshop:
+        if confirmationshop and not request.user.is_superuser:
             # Lấy queryset mặc định
-            queryset = queryset.filter(confirmationshop_user=request.user)
+            queryset = queryset.filter(user=request.user)
             return queryset
 
         return queryset
