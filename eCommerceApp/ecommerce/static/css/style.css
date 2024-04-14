@@ -166,7 +166,25 @@ a.facebook .facebook-icon {
     background-color: #fff;
 }
 
+a.github {
+    color: #fff;
+    background-color: #010101;
+}
+
+a.github .github-icon {
+    height: 28px;
+    width: 28px;
+    color: #010101;
+    font-size: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #fff;
+}
+
 .facebook-icon,
+.github-icon,
 img.google-img {
     position: absolute;
     top: 50%;

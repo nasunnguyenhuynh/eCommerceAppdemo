@@ -10,12 +10,11 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
-import os
-from dotenv import load_dotenv
 from pathlib import Path
 import cloudinary
+import pymysql
 
-load_dotenv()
+pymysql.install_as_MySQLdb()
 
 cloudinary.config(
     cloud_name="diwxda8bi",
@@ -39,7 +38,12 @@ SECRET_KEY = 'django-insecure-qf)xyu3+q#a9=wx8m=r(Y(HDHU(D(DA))&tm^nh_%%7@9#'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
+
+AUTHENTICATION_BACKENDS = [  # For Oauth2
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
 
 # Application definition
 
@@ -57,9 +61,88 @@ INSTALLED_APPS = [
     'ckeditor_uploader',
     'drf_yasg',
     'oauth2_provider',
-    'corsheaders'
+    'corsheaders',
+    # 'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.facebook',
+    'allauth.socialaccount.providers.github',
+    'allauth.socialaccount.providers.google',
+    'django_extensions',
 
 ]
+
+# SITE_ID = 1
+
+LOGIN_REDIRECT_URL = '/accounts/profile/'  # Redirect user logged in
+LOGOUT_REDIRECT_URL = '/accounts/logout/'  # Redirect user logged out
+SOCIALACCOUNT_LOGIN_ON_GET = True  # Skip allauth middle page login
+SOCIALACCOUNT_AUTO_SIGNUP = True  # Skip allauth middle page signup
+
+SOCIALACCOUNT_PROVIDERS = {
+    'facebook': {
+        'APP': {
+            'client_id': '1129130478229280',
+            # '': '16e7225bb8abb238614204164a7a1d30',
+            'key': ''
+        },
+        'METHOD': 'oauth2',  # Set to 'js_sdk' to use the Facebook connect SDK
+        # 'SDK_URL': '//connect.facebook.net/{locale}/sdk.js',
+        'SCOPE': ['email', 'public_profile'],
+        'AUTH_PARAMS': {'auth_type': 'reauthenticate'},
+        'INIT_PARAMS': {'cookie': True},
+        'FIELDS': [
+            'id',
+            'first_name',
+            'last_name',
+            'middle_name',
+            'name',
+            'name_format',
+            'picture',
+            'short_name'
+        ],
+        'EXCHANGE_TOKEN': True,
+        # 'LOCALE_FUNC': lambda request: 'en_US',
+        'VERIFIED_EMAIL': False,
+        'VERSION': 'v13.0',
+        'GRAPH_API_URL': 'https://graph.facebook.com/v13.0',
+    },
+    'github': {
+        'APP': {
+            'client_id': 'c750e15daeaa022800e5',
+            # '': 'ff00049a97d9ef41bc3354f8e00f135f4ab166db',
+            'key': ''
+        },
+        'SCOPE': [
+            'user',
+            'repo',
+            'read:org',
+        ],
+    },
+    'google': {
+        'APP': {
+            'client_id': '718959889156-agldhitsii4bvi9iue3atjub0kf5mjfs.apps.googleusercontent.com',
+            # '': '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',
+            'key': ''
+        },
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'offline',  # get refresh token, access token even though the user is offline
+        },
+        'OAUTH_PKCE_ENABLED': True,
+    }
+}
+
+# SOCIAL_AUTH_FACEBOOK_KEY = '1129130478229280'
+# SOCIAL_AUTH_FACEBOOK_SECRET = '16e7225bb8abb238614204164a7a1d30'
+# SOCIAL_AUTH_GITHUB_OAUTH2_KEY = 'c750e15daeaa022800e5'
+# SOCIAL_AUTH_GITHUB_OAUTH2_SECRET = 'ff00049a97d9ef41bc3354f8e00f135f4ab166db'
+# SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '718959889156-agldhitsii4bvi9iue3atjub0kf5mjfs.apps.googleusercontent.com'
+# SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = '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'
 
 CORS_ALLOW_ALL_ORIGINS = True
 
@@ -79,6 +162,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    'allauth.account.middleware.AccountMiddleware',
+    # 'logingoogle.middleware.AutoLogoutMiddleware',
 
 ]
 
@@ -110,7 +196,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'ecommerceapp',
         'USER': 'root',
-        'PASSWORD': 'root',
+        'PASSWORD': 'Admin@123',
         'HOST': '',
     }
 }
