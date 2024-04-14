@@ -6,7 +6,7 @@ r = routers.DefaultRouter()
 
 # api
 r.register('users', views.UserViewSet)
-r.register('confirmationshop', views.ConfirmationShop)
+# r.register('confirmationshop', views.ConfirmationShop)
 
 urlpatterns = [
     path('', include(r.urls)),  # tạo api

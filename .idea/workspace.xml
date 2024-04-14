@@ -7,8 +7,9 @@
     <list default="true" id="f8aae7f5-1761-47f4-98f0-8cb0dcfde433" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/eCommerceApp/eCommerceApp/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/eCommerceApp/eCommerceApp/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eCommerceApp/eCommerceApp/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/eCommerceApp/eCommerceApp/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/eCommerceApp/ecommerce/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/eCommerceApp/ecommerce/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/eCommerceApp/ecommerce/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/eCommerceApp/ecommerce/serializers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eCommerceApp/ecommerce/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/eCommerceApp/ecommerce/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/eCommerceApp/ecommerce/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/eCommerceApp/ecommerce/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/eCommerceApp/ecommerce/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/eCommerceApp/ecommerce/views.py" afterDir="false" />
     </list>
@@ -83,6 +84,11 @@
       <workItem from="1712797855804" duration="34476000" />
       <workItem from="1712837589537" duration="3510000" />
       <workItem from="1712844549307" duration="5835000" />
+      <workItem from="1712851826250" duration="99000" />
+      <workItem from="1712885415226" duration="2286000" />
+      <workItem from="1712902128449" duration="9502000" />
+      <workItem from="1712911953785" duration="650000" />
+      <workItem from="1713083238699" duration="8989000" />
     </task>
     <servers />
   </component>

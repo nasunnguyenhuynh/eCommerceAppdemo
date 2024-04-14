@@ -5,6 +5,7 @@ from django.utils.html import mark_safe
 from .models import Category, User, Product, Shop, ProductInfo, ProductImageDetail, ProductImagesColors, ProductVideos, \
     ProductSell, Voucher, VoucherCondition, VoucherType, ConfirmationShop, StatusConfirmationShop
 from django.contrib.auth.models import Group
+from django.db.models import QuerySet
 
 APP_NAME = "ecommerce"
 
@@ -139,13 +140,13 @@ class ShopAdmin(BasePermissionChecker, admin.ModelAdmin):
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
 
-        shop = Shop.objects.filter(user_id=request.user.id)
-        if request.user.groups.filter(name="VENDOR_MANAGER").exists() and shop:
+        shop = Shop.objects.filter(user_id=request.user.id).first()
+        if request.user.groups.filter(name="VENDOR_MANAGER").exists():
             # Lấy queryset mặc định
-            queryset = queryset.filter(user=request.user)
-
-            return queryset
-
+            if shop:
+                queryset = queryset.filter(user=request.user)
+                return queryset
+            return Shop.objects.none()
         return queryset
 
     def has_add_permission(self, request):
@@ -218,12 +219,16 @@ class ProductAdmin(BasePermissionChecker, admin.ModelAdmin):
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
 
-        shop = Shop.objects.filter(user_id=request.user.id)
-        if request.user.groups.filter(name="VENDOR_MANAGER").exists() and shop:
-            # Lấy queryset mặc định
-            queryset = queryset.filter(shop__user=request.user)
+        products = None
+        shop = Shop.objects.filter(user_id=request.user.id).first()  # .first() để chuyển từ dạng query sang object
+        if shop:
+            products = Product.objects.filter(shop_id=shop.id)
 
-            return queryset
+        if request.user.groups.filter(name="VENDOR_MANAGER").exists():
+            if products:
+                queryset = queryset.filter(shop__user=request.user)
+                return queryset
+            return Product.objects.none()
 
         return queryset
 
@@ -241,6 +246,22 @@ class ProductInfoAdmin(BasePermissionChecker, admin.ModelAdmin):
     list_display = ['id', 'product_id', 'product_name', 'origin', 'material', 'manufacture']
     search_fields = ['id', 'manufacture']
     list_filter = ['origin', 'material', 'manufacture']
+
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+
+        products = None
+        shop = Shop.objects.filter(user_id=request.user.id).first()  # .first() để chuyển từ dạng query sang object
+        if shop:
+            products = Product.objects.filter(shop_id=shop.id).all()
+
+        if request.user.groups.filter(name="VENDOR_MANAGER").exists():
+            if products:
+                queryset = queryset.filter(product__shop=shop)
+                return queryset
+            return ProductInfo.objects.none()
+
+        return queryset
 
     def product_name(self, obj):
         return obj.product.name
@@ -262,6 +283,22 @@ class ProductImageDetailAdmin(BasePermissionChecker, admin.ModelAdmin):
     list_display = ['id', 'product_id', 'my_image']
     search_fields = ['id', 'product_id']
     list_filter = ['product_id']
+
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+
+        products = None
+        shop = Shop.objects.filter(user_id=request.user.id).first()  # .first() để chuyển từ dạng query sang object
+        if shop:
+            products = Product.objects.filter(shop_id=shop.id).all()
+
+        if request.user.groups.filter(name="VENDOR_MANAGER").exists():
+            if products:
+                queryset = queryset.filter(product__shop=shop)
+                return queryset
+            return ProductImageDetail.objects.none()
+
+        return queryset
 
     def my_image(self, product):
         if product.image:
@@ -285,6 +322,22 @@ class ProductImagesColorsAdmin(BasePermissionChecker, admin.ModelAdmin):
     search_fields = ['id', 'name_color']
     list_filter = ['product_id']
 
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+
+        products = None
+        shop = Shop.objects.filter(user_id=request.user.id).first()  # .first() để chuyển từ dạng query sang object
+        if shop:
+            products = Product.objects.filter(shop_id=shop.id).all()
+
+        if request.user.groups.filter(name="VENDOR_MANAGER").exists():
+            if products:
+                queryset = queryset.filter(product__shop=shop)
+                return queryset
+            return ProductImagesColors.objects.none()
+
+        return queryset
+
     def my_image(self, product):
         if product.url_image:
             return mark_safe(f"<img width='200' height='200' src='{product.url_image.url}' />")
@@ -306,6 +359,22 @@ class ProductVideosAdmin(BasePermissionChecker, admin.ModelAdmin):
     list_display = ['id', 'product_id', 'my_video']
     search_fields = ['id']
     list_filter = ['product_id']
+
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+
+        products = None
+        shop = Shop.objects.filter(user_id=request.user.id).first()  # .first() để chuyển từ dạng query sang object
+        if shop:
+            products = Product.objects.filter(shop_id=shop.id).all()
+
+        if request.user.groups.filter(name="VENDOR_MANAGER").exists():
+            if products:
+                queryset = queryset.filter(product__shop=shop)
+                return queryset
+            return ProductVideos.objects.none()
+
+        return queryset
 
     def my_video(self, product):
         if product.url_video:
@@ -419,13 +488,16 @@ class ConfirmationShopAdmin(BasePermissionChecker, admin.ModelAdmin):
         ("Results", {'fields': ('status', 'note',)}),
     )
 
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name == 'status':
-            kwargs[
-                'queryset'] = StatusConfirmationShop.objects.all()
-            kwargs[
-                'to_field_name'] = 'status_content'
-        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+
+        confirmationshop = ConfirmationShop.objects.filter(user_id=request.user.id)
+        if confirmationshop:
+            # Lấy queryset mặc định
+            queryset = queryset.filter(confirmationshop_user=request.user)
+            return queryset
+
+        return queryset
 
     def avatar(self, confirmationshop):
         user = User.objects.get(id=confirmationshop.user_id)

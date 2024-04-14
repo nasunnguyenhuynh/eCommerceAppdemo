@@ -55,6 +55,9 @@ class Product(BaseModel):
     shop = models.ForeignKey(Shop, on_delete=models.CASCADE, null=False)
     category = models.ForeignKey(Category, on_delete=models.PROTECT, null=False, default=None)
 
+    def __str__(self):
+        return f"{self.category.name}/ {self.name}"
+
 
 class ProductImageDetail(models.Model):
     image = CloudinaryField()
