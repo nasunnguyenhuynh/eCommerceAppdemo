@@ -3,32 +3,33 @@
 {% providers_media_js %}
 {% load static %}
 
-{% block title %}Login{% endblock %}
+{% block title %}Signup{% endblock %}
 {% block content %}
     <section class="container forms">
-        <div class="form login">
+        <div class="form signup">
             <div class="form-content">
-                <header>Login</header>
-                <form action="#">
+                <header>Signup</header>
+                <form action="/accounts/signup/" method="post">
+                    {% csrf_token %}
                     <div class="field input-field">
-                        <input type="tel" placeholder="Phone number" class="input">
+                        <input type="tel" placeholder="Phone number" class="input" name="phone">
                     </div>
 
                     <div class="field input-field">
-                        <input type="password" placeholder="Password" class="password">
+                        <input type="password" placeholder="Create password" class="password" name="password1">
                     </div>
 
-                    <div class="form-link">
-                        <a href="#" class="forgot-pass">Forgot password?</a>
+                    <div class="field input-field">
+                        <input type="password" placeholder="Confirm password" class="password" name="password2">
                     </div>
 
                     <div class="field button-field">
-                        <button>Login</button>
+                        <button>Signup</button>
                     </div>
                 </form>
 
                 <div class="form-link">
-                    <span>Don't have an account? <a href="{% url 'signup' %}" class="link signup-link">Signup</a></span>
+                    <span>Already have an account? <a href="{% url 'login' %}" class="link login-link">Login</a></span>
                 </div>
             </div>
 

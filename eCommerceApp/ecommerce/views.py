@@ -8,21 +8,35 @@ from . import serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-
 # =========== Start Oauth2 ===============
 
-def display(request):
-    return render(request, 'index.html')
+import re
+from django.contrib import messages
+from django.http import HttpResponseRedirect
+
+
+def login(request):
+    return render(request, 'login.html')
+
+
+def signup(request):
+    return render(request, 'signup.html')
 
 
 def profile_view(request):
+    # Get image from SocialAccount
+    # if request.user.is_authenticated:
+    #     extra_data = SocialAccount.objects.get(user=request.user).extra_data
+    #     print(extra_data['picture'])
+    # else:
+    #     print("User not authenticated")
     if request.user.is_authenticated:
-        return render(request, 'login.html')
+        return render(request, 'noti.html')
 
 
 def log_out(request):
     logout(request)
-    return render(request, 'index.html')
+    return render(request, 'login.html')
 
 
 # =========== End Oauth2 ===============

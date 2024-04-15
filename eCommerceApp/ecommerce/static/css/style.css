@@ -27,20 +27,20 @@
     background: #FFF;
 }
 
-.form.signup {
-    opacity: 0;
-    pointer-events: none;
-}
+/*.form.signup {*/
+/*    opacity: 0;*/
+/*    pointer-events: none;*/
+/*}*/
 
-.forms.show-signup .form.signup {
-    opacity: 1;
-    pointer-events: auto;
-}
+/*.forms.show-signup .form.signup {*/
+/*    opacity: 1;*/
+/*    pointer-events: auto;*/
+/*}*/
 
-.forms.show-signup .form.login {
-    opacity: 0;
-    pointer-events: none;
-}
+/*.forms.show-signup .form.login {*/
+/*    opacity: 0;*/
+/*    pointer-events: none;*/
+/*}*/
 
 header {
     font-size: 28px;
@@ -81,16 +81,16 @@ form {
     border-bottom-width: 2px;
 }
 
-.eye-icon {
-    position: absolute;
-    top: 50%;
-    right: 10px;
-    transform: translateY(-50%);
-    font-size: 18px;
-    color: #8b8b8b;
-    cursor: pointer;
-    padding: 5px;
-}
+/*.eye-icon {*/
+/*    position: absolute;*/
+/*    top: 50%;*/
+/*    right: 10px;*/
+/*    transform: translateY(-50%);*/
+/*    font-size: 18px;*/
+/*    color: #8b8b8b;*/
+/*    cursor: pointer;*/
+/*    padding: 5px;*/
+/*}*/
 
 .field button {
     color: #fff;

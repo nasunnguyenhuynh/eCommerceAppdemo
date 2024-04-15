@@ -83,8 +83,8 @@ SOCIALACCOUNT_AUTO_SIGNUP = True  # Skip allauth middle page signup
 SOCIALACCOUNT_PROVIDERS = {
     'facebook': {
         'APP': {
-            'client_id': '',
-            'secret': '',
+            'client_id': '1129130478229280',
+            'secret': '16e7225bb8abb238614204164a7a1d30',
             'key': ''
         },
         'METHOD': 'oauth2',  # Set to 'js_sdk' to use the Facebook connect SDK
@@ -110,8 +110,8 @@ SOCIALACCOUNT_PROVIDERS = {
     },
     'github': {
         'APP': {
-            'client_id': '',
-            'secret': '',
+            'client_id': 'c750e15daeaa022800e5',
+            'secret': 'ff00049a97d9ef41bc3354f8e00f135f4ab166db',
             'key': ''
         },
         'SCOPE': [
@@ -122,8 +122,8 @@ SOCIALACCOUNT_PROVIDERS = {
     },
     'google': {
         'APP': {
-            'client_id': '',
-            'secret': '',
+            'client_id': '718959889156-agldhitsii4bvi9iue3atjub0kf5mjfs.apps.googleusercontent.com',
+            'secret': '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',
             'key': ''
         },
         'SCOPE': [
