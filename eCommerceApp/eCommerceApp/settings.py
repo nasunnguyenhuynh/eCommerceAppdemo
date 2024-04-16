@@ -62,7 +62,6 @@ INSTALLED_APPS = [
     'drf_yasg',
     'oauth2_provider',
     'corsheaders',
-    # 'django.contrib.sites',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -73,8 +72,7 @@ INSTALLED_APPS = [
 
 ]
 
-# SITE_ID = 1
-
+SOCIALACCOUNT_STORE_TOKENS = True
 LOGIN_REDIRECT_URL = '/accounts/profile/'  # Redirect user logged in
 LOGOUT_REDIRECT_URL = '/accounts/logout/'  # Redirect user logged out
 SOCIALACCOUNT_LOGIN_ON_GET = True  # Skip allauth middle page login

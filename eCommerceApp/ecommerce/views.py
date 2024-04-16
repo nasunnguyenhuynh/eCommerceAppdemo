@@ -8,11 +8,19 @@ from . import serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-# =========== Start Oauth2 ===============
 
-import re
-from django.contrib import messages
-from django.http import HttpResponseRedirect
+# =========== Start Oauth2 ===============
+# in adpater.py
+# def get_app(self, request, provider, client_id=None):
+#     from allauth.socialaccount.models import SocialApp
+#
+#     apps = self.list_apps(request, provider=provider, client_id=client_id)
+#     if len(apps) > 1:
+#         # raise MultipleObjectsReturned
+#         pass
+#     elif len(apps) == 0:
+#         raise SocialApp.DoesNotExist()
+#     return apps[0]
 
 
 def login(request):
