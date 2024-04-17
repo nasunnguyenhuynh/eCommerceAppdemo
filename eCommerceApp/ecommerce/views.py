@@ -1,3 +1,5 @@
+from allauth.socialaccount.models import SocialAccount
+import cloudinary.uploader, random
 from django.shortcuts import render
 from django.contrib.auth import logout
 from .models import Category, User, Product, Shop, ProductInfo, ProductImageDetail, ProductImagesColors, ProductVideos, \
@@ -5,8 +7,11 @@ from .models import Category, User, Product, Shop, ProductInfo, ProductImageDeta
     StatusConfirmationShop
 from rest_framework import viewsets, generics, status, parsers, permissions
 from . import serializers
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view
 from rest_framework.response import Response
+from django.core.cache import cache
+# from twilio.rest import Client
+from .serializers import SendOTPRequestSerializer, VerifyOTPRequestSerializer
 
 
 # =========== Start Oauth2 ===============
@@ -32,14 +37,29 @@ def signup(request):
 
 
 def profile_view(request):
-    # Get image from SocialAccount
-    # if request.user.is_authenticated:
-    #     extra_data = SocialAccount.objects.get(user=request.user).extra_data
-    #     print(extra_data['picture'])
-    # else:
-    #     print("User not authenticated")
+    picture_url = None
     if request.user.is_authenticated:
-        return render(request, 'noti.html')
+        user = request.user
+        if not user.avatar:
+            try:
+                social_account = SocialAccount.objects.get(user=user)
+                extra_data = social_account.extra_data
+                picture_url = extra_data.get('picture')
+                if picture_url:
+                    # Tải hình ảnh từ URL và lưu vào CloudinaryField
+                    upload_result = cloudinary.uploader.upload(picture_url)
+                    user.avatar = upload_result['url']
+                    user.save()
+                    print(f"URL mới được lưu trong Cloudinary: {user.avatar}")
+            except SocialAccount.DoesNotExist:
+                print("Không có thông tin SocialAccount tương ứng.")
+        else:
+            print(f"Hình ảnh hiện tại từ Cloudinary: {user.avatar.url}")
+            picture_url = user.avatar.url
+            return render(request, 'noti.html', {'picture_url': picture_url})
+    else:
+        print("User not authenticated")
+    return render(request, 'noti.html', {'picture_url': picture_url})
 
 
 def log_out(request):
@@ -48,6 +68,72 @@ def log_out(request):
 
 
 # =========== End Oauth2 ===============
+# =========== Start OTP ===============
+# Test Postman
+# POST /verify-otp/ phone_number, otp
+# POST /send-otp/ phone_number
+# Thời gian hết hạn của mã OTP (đơn vị: giây)
+OTP_EXPIRY_SECONDS = 300  # 5 phút
+
+
+def generate_otp():
+    return str(random.randint(100000, 999999))
+
+
+@api_view(['POST'])
+def send_otp(request):
+    serializer = SendOTPRequestSerializer(data=request.data)
+    if serializer.is_valid():
+        phone_number = serializer.validated_data['phone_number']
+
+        # Tạo mã OTP ngẫu nhiên
+        otp = generate_otp()
+        print(otp)
+        # Lưu mã OTP vào cache với khóa là số điện thoại
+        cache.set(phone_number, otp, timeout=OTP_EXPIRY_SECONDS)
+
+        # Gửi mã OTP đến số điện thoại bằng Twilio
+        # account_sid = 'ACf3bd63d2afda19fdcb1a7ab22793a8b8'
+        # auth_token = '[AuthToken]'
+        # client = Client(account_sid, auth_token)
+        # message_body = f'DJANGO: Nhập mã xác minh {otp} để đăng ký tài khoản. Mã có hiệu lực trong 5 phút.'
+        # message = client.messages.create(
+        #     from_='+12513090557',
+        #     body=message_body,
+        #     to=phone_number
+        # )
+        return Response({'message': 'Mã OTP đã được gửi đi.'})
+    else:
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+def verify_otp(request):
+    serializer = VerifyOTPRequestSerializer(data=request.data)
+    if serializer.is_valid():
+        phone_number = serializer.validated_data['phone_number']
+        otp = serializer.validated_data['otp']
+
+        # Lấy mã OTP từ cache
+        cached_otp = cache.get(phone_number)
+
+        # Kiểm tra xem mã OTP đã hết hạn chưa
+        if cached_otp is None:
+            return Response({'message': 'Mã OTP đã hết hạn.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Kiểm tra xem mã OTP nhập vào có khớp với mã OTP trong cache hay không
+        if otp == cached_otp:
+            # Xóa mã OTP từ cache sau khi đã sử dụng
+            cache.delete(phone_number)
+            return Response({'message': 'Mã OTP hợp lệ.'})
+        else:
+            return Response({'message': 'Mã OTP không hợp lệ.'}, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# =========== End OTP ===============
+
 
 #
 # from .models import User, Place, Purpose, Meeting, GuestMeeting

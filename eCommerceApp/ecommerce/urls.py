@@ -17,6 +17,8 @@ urlpatterns = [
     path('accounts/signup/', views.signup, name='signup'),
     path('accounts/profile/', views.profile_view, name='profile'),
     path('accounts/logout/', views.log_out, name='logout'),
+    path('send-otp/', views.send_otp, name='send_otp'),
+    path('verify-otp/', views.verify_otp, name='verify_otp'),
 
     # controller
 ]

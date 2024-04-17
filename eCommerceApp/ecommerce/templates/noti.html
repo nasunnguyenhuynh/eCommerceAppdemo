@@ -58,7 +58,7 @@
         <div>
             <p>Hi {{ user.username }} 🙂</p>
             <p>Your email is {{ user.email }}</p>
-            <img src="{{ user.profile.picture.url }}" alt="User picture">
+            <img src="{{ picture_url }}" alt="User picture">
             <p>Click here to <a href="/accounts/logout/">Sign out</a></p>
         </div>
     {% else %}

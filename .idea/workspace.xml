@@ -5,11 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f8aae7f5-1761-47f4-98f0-8cb0dcfde433" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/eCommerceApp.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/eCommerceApp.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/eCommerceApp/eCommerceApp/APP_ID_SECRET" beforeDir="false" afterPath="$PROJECT_DIR$/eCommerceApp/eCommerceApp/APP_ID_SECRET" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/eCommerceApp/ecommerce/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/eCommerceApp/ecommerce/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/eCommerceApp/ecommerce/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/eCommerceApp/ecommerce/serializers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eCommerceApp/ecommerce/templates/noti.html" beforeDir="false" afterPath="$PROJECT_DIR$/eCommerceApp/ecommerce/templates/noti.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eCommerceApp/ecommerce/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/eCommerceApp/ecommerce/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/eCommerceApp/ecommerce/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/eCommerceApp/ecommerce/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -91,7 +91,7 @@
       <workItem from="1713114296630" duration="2463000" />
       <workItem from="1713162089291" duration="25330000" />
       <workItem from="1713263350557" duration="11538000" />
-      <workItem from="1713308749290" duration="11759000" />
+      <workItem from="1713308749290" duration="27019000" />
     </task>
     <servers />
   </component>

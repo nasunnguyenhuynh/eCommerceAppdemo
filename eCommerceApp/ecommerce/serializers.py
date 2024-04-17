@@ -1,6 +1,7 @@
 from .models import Category, User, Product, Shop, ProductInfo, ProductImageDetail, ProductImagesColors, ProductVideos, \
     ProductSell, Voucher, VoucherCondition, VoucherType, ConfirmationShop, StatusConfirmationShop
 from rest_framework.serializers import ModelSerializer
+from rest_framework import serializers
 
 
 class UserSerializer(ModelSerializer):
@@ -55,3 +56,12 @@ class ConfirmationShopSerializer(ModelSerializer):
         rep['citizen_identification_image'] = instance.citizen_identification_image.url
 
         return rep
+
+
+class SendOTPRequestSerializer(serializers.Serializer):
+    phone_number = serializers.CharField(max_length=15)
+
+
+class VerifyOTPRequestSerializer(serializers.Serializer):
+    phone_number = serializers.CharField(max_length=15)
+    otp = serializers.CharField(max_length=6)
