@@ -64,6 +64,7 @@ def log_out(request):
 class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
     queryset = User.objects.filter(is_active=True)
     serializer_class = serializers.UserSerializer
+    parser_classes = [parsers.MultiPartParser, ]
 
     def get_permissions(self):
         if self.action in ['get_current_user', 'get_post_patch_confirmationshop', 'get_shop']:
@@ -71,7 +72,7 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
 
         return [permissions.AllowAny(), ]
 
-    @action(methods=['get', 'patch'], url_path='current-user', detail=False)
+    @action(methods=['get', 'patch'], url_path='current-user', detail=False)  # /users/current-user/
     def get_current_user(self, request):
         user = request.user
         if request.method.__eq__('PATCH'):  # PATCH này phải viết hoa
@@ -81,7 +82,7 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
 
         return Response(serializers.UserSerializer(user).data)
 
-    @action(methods=['post'], url_path='user', detail=False)
+    @action(methods=['post'], url_path='user', detail=False)  # /users/user/
     def post_current_user(self, request):
         avatar = request.data.get('avatar')
         phone = request.data.get('phone')
@@ -89,7 +90,7 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
         password = request.data.get('password')
         # user = self.get_object().create()
 
-    @action(methods=['get', 'post', 'patch'], url_path='confirmationshop', detail=True)
+    @action(methods=['get', 'post', 'patch'], url_path='confirmationshop', detail=True)  # /users/{id}/confirmationshop/
     def get_post_patch_confirmationshop(self, request, pk):
         if request.method.__eq__('PATCH'):  # Patch vẫn cập nhật đc 2 dòng ảnh và status
             citizen_identification_image_data = request.data.get('citizen_identification_image')
@@ -116,14 +117,11 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
         return Response(serializers.ConfirmationShopSerializer(confirmationShops, many=True).data,
                         status=status.HTTP_200_OK)
 
-    @action(methods=['get'], url_path="shop", detail=True)
+    @action(methods=['get'], url_path="shop", detail=True)  # /users/{id}/shop/
     def get_shop(self, request, pk):
         shop = self.get_object().shop_set.filter(active=True, user_id=pk).first()
         # shop = Shop.objects.get(active=True, user_id=pk)
         return Response(serializers.ShopSerializer(shop).data, status=status.HTTP_200_OK)
-
-    parser_classes = [
-        parsers.MultiPartParser, ]
 
 
 class ShopViewSet(viewsets.ViewSet, generics.CreateAPIView):

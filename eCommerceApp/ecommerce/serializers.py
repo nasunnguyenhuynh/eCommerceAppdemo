@@ -4,15 +4,27 @@ from rest_framework.serializers import ModelSerializer
 
 
 class UserSerializer(ModelSerializer):
+    def create(self, validated_data):  # hash password be4 store in database
+        data = validated_data.copy()
+        user = User(**data)  # unpacking dict and pass them as arg into init model User
+        user.set_password(user.password)
+        user.save()
+
+        return user
+
     class Meta:
         model = User
-        fields = ['id', 'username', 'avatar', 'first_name', 'last_name', 'email', 'birthday', 'phone', 'is_staff',
-                  'is_vendor', 'is_superuser', 'is_active']
+        fields = ['id', 'username', 'password', 'avatar', 'first_name', 'last_name', 'email', 'birthday', 'phone']
+        # 'is_staff', 'is_vendor', 'is_superuser', 'is_active'] Dont need to return, to affect to create a user with no oauth
+        extra_kwargs = {  # prevent the password field returned when creating a new user
+            'password': {
+                'write_only': 'true'
+            }
+        }
 
     def to_representation(self, instance):  # ghi đè 1 trường trong fields
         rep = super().to_representation(instance)
-        rep['avatar'] = instance.avatar.url
-
+        rep['avatar'] = instance.avatar.url if instance.avatar and hasattr(instance.avatar, 'url') else None
         return rep
 
 
