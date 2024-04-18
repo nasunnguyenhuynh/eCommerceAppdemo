@@ -14,6 +14,9 @@ Config and Login with Social Accounts
 Create cert and key
 
 	pip install Werkzeug, pyOpenSSL
+Config send SMS
+
+	pip install twilio
 <p>Create database in mySQL<br/>
 Run migrate
 
@@ -40,3 +43,5 @@ Insecure Login Block Solution:
 <h2>Integrate Social Accounts</h2>
 <p>https://docs.allauth.org/en/latest/installation/quickstart.html</p>
 <p>https://django-extensions.readthedocs.io/en/latest/runserver_plus.html</p>
+<h1>Integrate Twilio</h1>
+<p>https://www.twilio.com/docs/messaging/quickstart</p>
