@@ -9,22 +9,18 @@
         <div class="form login">
             <div class="form-content">
                 <header>Login</header>
-                <form action="#">
+                <form method="POST" action="{% url 'login-with-sms' %}">
+                    {% csrf_token %}
                     <div class="field input-field">
-                        <input type="tel" placeholder="Phone number" class="input">
-                    </div>
-
-                    <div class="field input-field">
-                        <input type="password" placeholder="Password" class="password">
+                        <input type="tel" placeholder="Phone number" class="input" name="phone_number">
                     </div>
 
                     <div class="form-link">
-                        <a href="#" class="forgot-pass">Forgot password</a>
-                        <a href="{% url 'login-with-sms' %}" class="forgot-pass">Login with SMS</a>
+                        <a href="{% url 'login' %}" class="forgot-pass">Login with password</a>
                     </div>
 
                     <div class="field button-field">
-                        <button>Login</button>
+                        <button type="submit">Send SMS</button>
                     </div>
                 </form>
 

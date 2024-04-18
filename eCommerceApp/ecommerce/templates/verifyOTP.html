@@ -1,0 +1,38 @@
+{% extends "layout/base.html" %}
+{% load static %}
+
+{% block title %}Verify OTP{% endblock %}
+{% block content %}
+    <section class="container forms">
+        <div class="form confirm">
+            <div class="form-content">
+                <header>Confirm phone number</header>
+                <p>Your verification code will be sent by text message to {{ phone_number }}</p>
+                <form method="POST" action="{% url 'verify_otp' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="phone_number" value="{{ phone_number }}">
+                    <div class="field input-field">
+                        <input type="tel" placeholder="Enter OTP here ..." class="input" name="otp">
+                    </div>
+
+                    <div class="field button-field">
+                        <button type="submit">Confirm</button>
+                    </div>
+                </form>
+                <div class="line"></div>
+                {#    Thong bao nhap OTP sai, het han#}
+                {#    Template dung de dang nhap voi Phone +    SMS#}
+                <div class="form-link">
+                    <p>Wait .. to resend</p>
+                    <p>Haven't received it yet?</p>
+                    <span>
+                        <a href="{% url 'signup' %}" class="link signup-link">resend </a>
+                        or <a href="{% url 'signup' %}" class="link signup-link">use other methods </a>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- JavaScript -->
+    <script src="{% static 'js/script.js' %}"></script>
+{% endblock %}

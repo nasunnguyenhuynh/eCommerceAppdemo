@@ -1,6 +1,6 @@
 from allauth.socialaccount.models import SocialAccount
 import cloudinary.uploader, random
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth import logout
 from .models import Category, User, Product, Shop, ProductInfo, ProductImageDetail, ProductImagesColors, ProductVideos, \
     ProductSell, Voucher, VoucherCondition, VoucherType, ConfirmationShop, \
@@ -71,7 +71,7 @@ def log_out(request):
 # =========== Start OTP ===============
 # Test Postman
 # POST /verify-otp/ phone_number, otp
-# POST /send-otp/ phone_number
+# POST /login-with-sms/ phone_number
 # Thời gian hết hạn của mã OTP (đơn vị: giây)
 OTP_EXPIRY_SECONDS = 300  # 5 phút
 
@@ -80,31 +80,35 @@ def generate_otp():
     return str(random.randint(100000, 999999))
 
 
-@api_view(['POST'])
+@api_view(['GET', 'POST'])
 def send_otp(request):
-    serializer = SendOTPRequestSerializer(data=request.data)
-    if serializer.is_valid():
-        phone_number = serializer.validated_data['phone_number']
+    if request.method == 'GET':
+        return render(request, 'loginWithSms.html')
 
-        # Tạo mã OTP ngẫu nhiên
-        otp = generate_otp()
-        print(otp)
-        # Lưu mã OTP vào cache với khóa là số điện thoại
-        cache.set(phone_number, otp, timeout=OTP_EXPIRY_SECONDS)
+    if request.method == 'POST':
+        serializer = SendOTPRequestSerializer(data=request.data)
+        if serializer.is_valid():
+            phone_number = serializer.validated_data['phone_number']
 
-        # Gửi mã OTP đến số điện thoại bằng Twilio
-        # account_sid = 'ACf3bd63d2afda19fdcb1a7ab22793a8b8'
-        # auth_token = '[AuthToken]'
-        # client = Client(account_sid, auth_token)
-        # message_body = f'DJANGO: Nhập mã xác minh {otp} để đăng ký tài khoản. Mã có hiệu lực trong 5 phút.'
-        # message = client.messages.create(
-        #     from_='+12513090557',
-        #     body=message_body,
-        #     to=phone_number
-        # )
-        return Response({'message': 'Mã OTP đã được gửi đi.'})
-    else:
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            # Tạo mã OTP ngẫu nhiên
+            otp = generate_otp()
+            print(otp)
+            # Lưu mã OTP vào cache với khóa là số điện thoại
+            cache.set(phone_number, otp, timeout=OTP_EXPIRY_SECONDS)
+            print(phone_number)
+            # Gửi mã OTP đến số điện thoại bằng Twilio
+            # account_sid = 'ACf3bd63d2afda19fdcb1a7ab22793a8b8'
+            # auth_token = '[AuthToken]'
+            # client = Client(account_sid, auth_token)
+            # message_body = f'DJANGO: Nhập mã xác minh {otp} để đăng ký tài khoản. Mã có hiệu lực trong 5 phút.'
+            # message = client.messages.create(
+            #     from_='+12513090557',
+            #     body=message_body,
+            #     to=phone_number
+            # )
+            return render(request, 'verifyOTP.html', {'phone_number': phone_number})
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])
@@ -125,7 +129,7 @@ def verify_otp(request):
         if otp == cached_otp:
             # Xóa mã OTP từ cache sau khi đã sử dụng
             cache.delete(phone_number)
-            return Response({'message': 'Mã OTP hợp lệ.'})
+            return redirect('/')
         else:
             return Response({'message': 'Mã OTP không hợp lệ.'}, status=status.HTTP_400_BAD_REQUEST)
     else:
