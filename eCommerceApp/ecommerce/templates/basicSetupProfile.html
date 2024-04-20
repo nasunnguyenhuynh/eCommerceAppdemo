@@ -1,0 +1,32 @@
+{% extends "layout/base.html" %}
+{% load static %}
+
+{% block title %}Setup Profile{% endblock %}
+{% block content %}
+    <section class="container forms">
+        <div class="form basicSetupProfile">
+            <div class="form-content">
+                <header>Login</header>
+                <form id="basicSetupProfileForm" method="POST" action="{% url 'basic_setup_profile' %}"
+                      enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="hidden" name="phone" value="{{ phone }}">
+                    <div class="field input-field">
+                        <input type="text" placeholder="Username" id="username" class="input"
+                               name="username" required>
+                    </div>
+
+                    <div class="field input-field">
+                        <input type="file" id="filename" name="filename" required>
+                    </div>
+                    <div class="field button-field">
+                        <button type="submit">Submit</button>
+                    </div>
+                </form>
+                <div id="errorMessages"></div>
+            </div>
+        </div>
+    </section>
+    <!-- JavaScript -->
+    {#        <script src="{% static 'js/script.js' %}"></script>#}
+{% endblock %}

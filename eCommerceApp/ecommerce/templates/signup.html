@@ -9,25 +9,28 @@
         <div class="form signup">
             <div class="form-content">
                 <header>Signup</header>
-                <form action="/accounts/signup/" method="post">
+                <form id="signupForm" method="POST" action="{% url 'signup' %}">
                     {% csrf_token %}
-                    <div class="field input-field">
-                        <input type="tel" placeholder="Phone number" class="input" name="phone">
-                    </div>
+                    <input type="hidden" name="is_signup" value="True">
 
                     <div class="field input-field">
-                        <input type="password" placeholder="Create password" class="password" name="password1">
+                        <input type="tel" placeholder="Phone number" class="input" id="phone_number"
+                               name="phone" required>
                     </div>
-
                     <div class="field input-field">
-                        <input type="password" placeholder="Confirm password" class="password" name="password2">
+                        <input type="password" placeholder="Create password" id="password" required>
                     </div>
 
+                    <div class=" field input-field">
+                        <input type="password" placeholder="Confirm password" id="retype_password"
+                               name="password" required>
+                    </div>
                     <div class="field button-field">
-                        <button>Signup</button>
+                        <button id="submit-btn" type="submit">Signup</button>
                     </div>
-                </form>
 
+                </form>
+                <div id="errorMessages"></div>
                 <div class="form-link">
                     <span>Already have an account? <a href="{% url 'login' %}" class="link login-link">Login</a></span>
                 </div>

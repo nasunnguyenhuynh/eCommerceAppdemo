@@ -56,12 +56,3 @@ class ConfirmationShopSerializer(ModelSerializer):
         rep['citizen_identification_image'] = instance.citizen_identification_image.url
 
         return rep
-
-
-class SendOTPRequestSerializer(serializers.Serializer):
-    phone_number = serializers.CharField(max_length=15)
-
-
-class VerifyOTPRequestSerializer(serializers.Serializer):
-    phone_number = serializers.CharField(max_length=15)
-    otp = serializers.CharField(max_length=6)

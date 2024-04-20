@@ -7,10 +7,26 @@
         <div class="form confirm">
             <div class="form-content">
                 <header>Confirm phone number</header>
-                <p>Your verification code will be sent by text message to {{ phone_number }}</p>
-                <form method="POST" action="{% url 'verify_otp' %}">
+                {% if is_login or is_signup %}
+                    <p>Your verification code will be sent by text message to {{ phone }}</p>
+                    <form method="POST" action="{% url 'verify_otp' %}">
                     {% csrf_token %}
-                    <input type="hidden" name="phone_number" value="{{ phone_number }}">
+                {% endif %}
+                {% if existing_user %}
+                    <form method="GET" action="{% url 'verify_otp' %}">
+                    {% csrf_token %}
+                    <div>
+                        <p>{{ phone }} used for {{ existing_user }}</p>
+                        <p>Do you want to continue?</p>
+                    </div>
+                    {#                        <input type="hidden" name="is_continue" value="True">#}
+                    <div class="field button-field">
+                        {#                        <a href="{% url 'verify_otp' %}"><button>Continue</button></a>#}
+                        <button type="submit">Continue</button>
+                    </div>
+                {% endif %}
+
+                {% if is_login or is_signup %}
                     <div class="field input-field">
                         <input type="tel" placeholder="Enter OTP here ..." class="input" name="otp">
                     </div>
@@ -18,6 +34,8 @@
                     <div class="field button-field">
                         <button type="submit">Confirm</button>
                     </div>
+                {% endif %}
+
                 </form>
                 <div class="line"></div>
                 {#    Thong bao nhap OTP sai, het han#}
