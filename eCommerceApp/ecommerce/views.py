@@ -2,7 +2,7 @@ from allauth.socialaccount.models import SocialAccount
 import cloudinary.uploader, random, uuid
 # import bcrypt
 from django.shortcuts import render, redirect
-from django.contrib.auth import logout, authenticate, login as auth_login
+from django.contrib.auth import logout, authenticate, login
 
 from .models import Category, User, Product, Shop, ProductInfo, ProductImageDetail, ProductImagesColors, ProductVideos, \
     ProductSell, Voucher, VoucherCondition, VoucherType, ConfirmationShop, \
@@ -36,10 +36,27 @@ def user_login(request):
     if request.method == 'POST':
         phone = request.data.get('phone')
         password = request.data.get('password')
-        users_with_phone = User.objects.filter(phone=phone, is_active=1)
-        if users_with_phone.exists():
-            return render(request, 'noti.html')
-        return render(request, 'login.html', {'error': 'Invalid phone or password.'})
+        users_with_phone = User.objects.filter(phone=phone, is_active=1)  # return query set
+        if users_with_phone.exists():  # Match phone & is_active
+            user = authenticate(request, username=users_with_phone.first().username, password=password)
+            if user is not None:  # Match username = password
+                login(request, user)
+                return redirect('profile')
+        return Response({'error': 'Invalid phone or password.'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        # serializer = serializers.LoginWithPhoneSerializer(data=request.data)
+        # if serializer.is_valid():
+        #     phone = serializer.validated_data.get('phone')
+        #     password = serializer.validated_data.get('password')
+        #     user = authenticate(request, username=phone, password=password,
+        #                         backend='ecommerce.authentication.PhoneAuthenticationBackend')
+        #     if user is not None:
+        #         login(request, user)
+        #         return redirect('profile')
+        #     else:
+        #         return Response({'error': 'Invalid phone or password.'}, status=status.HTTP_401_UNAUTHORIZED)
+        # else:
+        #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 def log_out(request):
@@ -157,10 +174,13 @@ def verify_otp(request):  # Login và Signup đều cần
             cache.delete(phone)  # Xóa cache_otp
             if cache.get('is_login'):  # Xóa cache_is_login
                 cache.delete('is_login')
+                user = User.objects.get(phone=phone, is_active=1)
+                login(request, user, backend='django.contrib.auth.backends.ModelBackend')
                 del request.session['phone']
                 return redirect('profile')
 
             if cache.get('is_signup'):  # Xóa cache_is_signup
+                cache.delete('is_signup')
                 return redirect('basic_setup_profile')
 
         else:
@@ -175,8 +195,6 @@ def basic_setup_profile(request):  # Đều dùng cho signup cũ và mới
     if request.method == 'POST':
         username = request.data.get('username')
         file = request.FILES.get('filename')
-        # phone = request.session.get('phone')
-        # print('phone: ', phone)
         print('password: ', cache.get('password'))
         print('username: ', username)
 
@@ -188,12 +206,14 @@ def basic_setup_profile(request):  # Đều dùng cho signup cũ và mới
             if file:
                 response = cloudinary.uploader.upload(file)
                 avatar_url = response.get('url')
-
-                User.objects.filter(username=cache.get('existing_user')).update(is_active=0)
+                # is_active=0 vs user has used phone be4 & create new user
+                User.objects.filter(phone=request.session.get('phone'), is_active=1).update(is_active=0)
                 user = User.objects.create_user(username=username, password=cache.get('password'),
                                                 phone=request.session.get('phone'), avatar=avatar_url)
                 user.is_active = 1
                 user.save()
+
+                login(request, user, backend='django.contrib.auth.backends.ModelBackend')
 
                 cache.delete('password')  # Xóa cache_password_signup
                 del request.session['phone']  # Xóa session_phone_signup
