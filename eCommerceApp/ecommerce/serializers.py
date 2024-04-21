@@ -56,3 +56,49 @@ class ConfirmationShopSerializer(ModelSerializer):
         rep['citizen_identification_image'] = instance.citizen_identification_image.url
 
         return rep
+
+
+class UserLoginSerializer(serializers.Serializer):
+    phone = serializers.CharField()
+    password = serializers.CharField()
+
+    def validate(self, data):
+        phone = data.get('phone')
+        password = data.get('password')
+        if not phone or not password:
+            raise serializers.ValidationError("Both phone and password are required.")
+        return data
+
+
+class UserLoginWithSMSSerializer(serializers.Serializer):
+    phone = serializers.CharField()
+
+    def validate(self, data):
+        phone = data.get('phone')
+        if not phone:
+            raise serializers.ValidationError("Phone number is required.")
+        return data
+
+
+class VerifyOTPSerializer(serializers.Serializer):
+    otp = serializers.CharField()
+
+    def validate(self, data):
+        otp = data.get('otp')
+        if not otp:
+            raise serializers.ValidationError("OTP is required.")
+        return data
+
+
+class UserSignupSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    avatar = serializers.ImageField()
+
+    def validate(self, data):
+        username = data.get('username')
+        avatar = data.get('avatar')
+        if not username:
+            raise serializers.ValidationError("Username is required.")
+        if not avatar:
+            raise serializers.ValidationError("Avatar image is required.")
+        return data

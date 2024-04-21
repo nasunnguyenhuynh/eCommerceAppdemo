@@ -3,6 +3,7 @@ import cloudinary.uploader, random, uuid
 # import bcrypt
 from django.shortcuts import render, redirect
 from django.contrib.auth import logout, authenticate, login
+from django.views.decorators.csrf import csrf_exempt
 
 from .models import Category, User, Product, Shop, ProductInfo, ProductImageDetail, ProductImagesColors, ProductVideos, \
     ProductSell, Voucher, VoucherCondition, VoucherType, ConfirmationShop, \
@@ -26,37 +27,41 @@ from twilio.rest import Client
 #     elif len(apps) == 0:
 #         raise SocialApp.DoesNotExist()
 #     return apps[0]
-
-
-@api_view(['GET', 'POST'])
+@api_view(['POST', 'GET'])
 def user_login(request):
     if request.method == 'GET':
-        return render(request, 'login.html')
-
+        return Response({'success': 'Get form to login successfully'}, status=status.HTTP_200_OK)
     if request.method == 'POST':
-        phone = request.data.get('phone')
-        password = request.data.get('password')
-        users_with_phone = User.objects.filter(phone=phone, is_active=1)  # return query set
-        if users_with_phone.exists():  # Match phone & is_active
-            user = authenticate(request, username=users_with_phone.first().username, password=password)
-            if user is not None:  # Match username = password
-                login(request, user)
-                return redirect('profile')
-        return Response({'error': 'Invalid phone or password.'}, status=status.HTTP_401_UNAUTHORIZED)
+        serializer = serializers.UserLoginSerializer(data=request.data)
+        if serializer.is_valid():
+            phone = serializer.validated_data.get('phone')
+            password = serializer.validated_data.get('password')
 
-        # serializer = serializers.LoginWithPhoneSerializer(data=request.data)
-        # if serializer.is_valid():
-        #     phone = serializer.validated_data.get('phone')
-        #     password = serializer.validated_data.get('password')
-        #     user = authenticate(request, username=phone, password=password,
-        #                         backend='ecommerce.authentication.PhoneAuthenticationBackend')
-        #     if user is not None:
-        #         login(request, user)
-        #         return redirect('profile')
-        #     else:
-        #         return Response({'error': 'Invalid phone or password.'}, status=status.HTTP_401_UNAUTHORIZED)
-        # else:
-        #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            users_with_phone = User.objects.filter(phone=phone, is_active=1)
+            if users_with_phone.exists():
+                user = authenticate(request, username=users_with_phone.first().username, password=password)
+                if user is not None:
+                    login(request, user)
+                    return Response({'success': 'Login successfully'}, status=status.HTTP_200_OK)
+            return Response({'error': 'Invalid phone or password.'}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# @api_view(['GET', 'POST'])
+# def user_login(request):
+#     if request.method == 'GET':
+#         return render(request, 'login.html')
+#
+#     if request.method == 'POST':
+#         phone = request.data.get('phone')
+#         password = request.data.get('password')
+#         users_with_phone = User.objects.filter(phone=phone, is_active=1)  # return query set
+#         if users_with_phone.exists():  # Match phone & is_active
+#             user = authenticate(request, username=users_with_phone.first().username, password=password)
+#             if user is not None:  # Match username = password
+#                 login(request, user)
+#                 return redirect('profile')
+#         return Response({'error': 'Invalid phone or password.'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
 def log_out(request):
@@ -67,41 +72,38 @@ def log_out(request):
 @api_view(['GET', 'POST'])
 def user_signup(request):
     if request.method == 'GET':
-        return render(request, 'signup.html')
+        return Response({'success': 'Get form to signup successfully'}, status=status.HTTP_200_OK)
 
     if request.method == 'POST':  # post phone + PW + rePW
-        phone = request.data.get('phone')
-        password = request.data.get('password')
+        serializer = serializers.UserLoginSerializer(data=request.data)
+        if serializer.is_valid():
+            phone = serializer.validated_data.get('phone')
+            password = serializer.validated_data.get('password')
 
-        # Kiểm tra phone used
-        existing_user = User.objects.filter(phone=phone, is_active=1).first()
-        if existing_user:  # existing_user chuyen den verify_otp
-            cache.set('existing_user', existing_user.username)
-            print(existing_user.username)
+            request.session['phone'] = phone  # Tạo session_phone_loginWithSms để verify
+            otp = generate_otp()  # Tạo cache_otp_signup
+            cache.set('password', password, timeout=OTP_EXPIRY_SECONDS)  # Tạo cache_password_signup
+            print('sup_PW', cache.get('password'))
+            cache.set(phone, otp, timeout=OTP_EXPIRY_SECONDS)  # Lưu mã OTP vào cache với khóa là số điện thoại
+            cache.set('is_signup', True, timeout=OTP_EXPIRY_SECONDS)  # Tạo cache_is_signup để verify
 
-        # Tạo mã OTP ngẫu nhiên
-        otp = generate_otp()
-        print(otp)
-        # Lưu mã OTP vào cache với khóa là số điện thoại
-        cache.set(phone, otp, timeout=OTP_EXPIRY_SECONDS)  # Tạo cache_otp_signup
-        cache.set('password', password, timeout=OTP_EXPIRY_SECONDS)  # Tạo cache_password_signup
-        cache.set('is_signup', request.data.get('is_signup'), timeout=OTP_EXPIRY_SECONDS)  # Tạo cache_is_signup
-        print(phone)
-        print('catchPW', cache.get('password'))
+            # Kiểm tra phone used
+            existing_user = User.objects.filter(phone=phone, is_active=1).first()
+            if existing_user:  # existing_user chuyen den verify_otp
+                cache.set('existing_user', existing_user.username)
 
-        # Gửi mã OTP đến số điện thoại bằng Twilio
-        # account_sid = 'ACf3bd63d2afda19fdcb1a7ab22793a8b8'
-        # auth_token = '[AuthToken]'
-        # client = Client(account_sid, auth_token)
-        # message_body = f'DJANGO: Nhập mã xác minh {otp} để đăng ký tài khoản. Mã có hiệu lực trong 5 phút.'
-        # message = client.messages.create(
-        #     from_='+12513090557',
-        #     body=message_body,
-        #     to=phone_number
-        # )
-
-        request.session['phone'] = phone  # Tạo session_phone_signup để verify
-        return redirect('verify_otp')
+            # Gửi mã OTP đến số điện thoại bằng Twilio
+            # account_sid = 'ACf3bd63d2afda19fdcb1a7ab22793a8b8'
+            # auth_token = '[AuthToken]'
+            # client = Client(account_sid, auth_token)
+            # message_body = f'DJANGO: Nhập mã xác minh {otp} để đăng ký tài khoản. Mã có hiệu lực trong 5 phút.'
+            # message = client.messages.create(
+            #     from_='+12513090557',
+            #     body=message_body,
+            #     to=phone_number
+            # )
+            return Response({'message': f'Mã OTP của bạn là {otp}.'})
+        return Response({'error': 'Invalid phone or password.'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
 # Test Postman
@@ -116,115 +118,112 @@ def generate_otp():
 
 
 @api_view(['GET', 'POST'])
-def login_with_sms(request):  # post len loginWithSms -> verifyOTP
-    if request.method == 'GET':
-        return render(request, 'loginWithSms.html')
-
+def login_with_sms(request):
+    if request.method == 'GET':  # post len loginWithSms -> verifyOTP
+        return Response({'success': 'Get form to login with SMS successfully'}, status=status.HTTP_200_OK)
     if request.method == 'POST':  # post phone + generate otp
-        phone = request.data.get('phone')
-        request.session['phone'] = phone  # Tạo session_phone_loginWithSms để verify
-        # Tạo mã OTP ngẫu nhiên
-        otp = generate_otp()
-        print(otp)
-        # Lưu mã OTP vào cache với khóa là số điện thoại
-        cache.set(phone, otp, timeout=OTP_EXPIRY_SECONDS)
-        print(phone)
-        # Gửi mã OTP đến số điện thoại bằng Twilio
-        # account_sid = 'ACf3bd63d2afda19fdcb1a7ab22793a8b8'
-        # auth_token = '[AuthToken]'
-        # client = Client(account_sid, auth_token)
-        # message_body = f'DJANGO: Nhập mã xác minh {otp} để đăng ký tài khoản. Mã có hiệu lực trong 5 phút.'
-        # message = client.messages.create(
-        #     from_='+12513090557',
-        #     body=message_body,
-        #     to=phone_number
-        # )
-        cache.set('is_login', True, timeout=OTP_EXPIRY_SECONDS)  # Tạo cache_is_login để verify
-        return redirect('verify_otp')
+        serializer = serializers.UserLoginWithSMSSerializer(data=request.data)
+        if serializer.is_valid():
+            phone = serializer.validated_data.get('phone')
+            request.session['phone'] = phone  # Tạo session_phone_loginWithSms để verify
+            otp = generate_otp()
+            cache.set(phone, otp, timeout=OTP_EXPIRY_SECONDS)  # Lưu mã OTP vào cache với khóa là số điện thoại
+            cache.set('is_login', True, timeout=OTP_EXPIRY_SECONDS)  # Tạo cache_is_login để verify
+            # Gửi mã OTP đến số điện thoại bằng Twilio
+            # account_sid = 'ACf3bd63d2afda19fdcb1a7ab22793a8b8'
+            # auth_token = '[AuthToken]'
+            # client = Client(account_sid, auth_token)
+            # message_body = f'DJANGO: Nhập mã xác minh {otp} để đăng ký tài khoản. Mã có hiệu lực trong 5 phút.'
+            # message = client.messages.create(
+            # from_='+12513090557',
+            # body=message_body,
+            # to=phone_number
+            # )
+            return Response({'message': f'Mã OTP của bạn là {otp}.'})
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET', 'POST'])
-def verify_otp(request):  # Login và Signup đều cần
+def verify_otp(request):
     if request.method == 'GET':
         phone = request.session.get('phone')  # lấy phone từ session_phone_loginWithSms | session_phone_signup
         if cache.get('is_login'):  # Nếu là login
             is_login = cache.get('is_login')  # Lấy is_login từ cache_is_login
-            return render(request,  # Trả về để nhập OTP_login
-                          'verifyOTP.html', {'is_login': is_login, 'phone': phone})
+            return Response({'success': 'Get form to login successfully'},
+                            {'is_login': is_login, 'phone': phone})
         if cache.get('is_signup'):  # Nếu là signup
             is_signup = cache.get('is_signup')
             # Kiểm tra existing_user $$$$$$$$$$$$$$$$$$4
             if cache.get('existing_user'):
                 existing_user = cache.get('existing_user')
                 cache.delete('existing_user')
-                return render(request,  # Trả về để chọn tiếp
-                              'verifyOTP.html', {'existing_user': existing_user, 'phone': phone})
-            return render(request,  # Trả về để nhập OTP
-                          'verifyOTP.html', {'is_signup': is_signup, 'phone': phone})
+                return Response({'success': f'{phone} was used for {existing_user} user'}, status=status.HTTP_200_OK)
+            return Response({'success': 'Get form to signup successfully'}, {'is_signup': is_signup, 'phone': phone})
 
     if request.method == 'POST':  # post phone + otp
-        phone = request.session.get('phone')  # lấy phone từ session_phone_loginWithSms | session_phone_signup
-        otp = request.data.get('otp')  # lấy otp người dùng nhập
+        serializer = serializers.VerifyOTPSerializer(data=request.data)
+        if serializer.is_valid():
+            phone = request.session.get('phone')  # lấy phone từ session_phone_loginWithSms | session_phone_signup
+            otp = serializer.validated_data.get('otp')
 
-        # Lay va kiem tra otp
-        cached_otp = cache.get(phone)
-        if cached_otp is None:
-            return Response({'message': 'Mã OTP đã hết hạn.'}, status=status.HTTP_400_BAD_REQUEST)
-        if otp == cached_otp:
-            cache.delete(phone)  # Xóa cache_otp
-            if cache.get('is_login'):  # Xóa cache_is_login
-                cache.delete('is_login')
-                user = User.objects.get(phone=phone, is_active=1)
-                login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-                del request.session['phone']
-                return redirect('profile')
-
-            if cache.get('is_signup'):  # Xóa cache_is_signup
-                cache.delete('is_signup')
-                return redirect('basic_setup_profile')
-
+            cached_otp = cache.get(phone)  # Lấy mã OTP từ cache
+            if cached_otp is None:
+                return Response({'message': 'Mã OTP đã hết hạn.'}, status=status.HTTP_400_BAD_REQUEST)
+            print('otp_cotp', otp == cached_otp)
+            if otp == cached_otp:
+                cache.delete(phone)  # Xóa mã OTP từ cache sau khi đã sử dụng
+                if cache.get('is_login'):  # Xóa cache_is_login
+                    cache.delete('is_login')
+                    user = User.objects.get(phone=phone, is_active=1)
+                    login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+                    del request.session['phone']
+                    return Response({'success': 'Login with SMS successfully'}, status=status.HTTP_200_OK)
+                print(cache.get('is_signup'))
+                if cache.get('is_signup'):  # Xóa cache_is_signup
+                    cache.delete('is_signup')
+                    return Response({'success': 'Continue to setup profile to finish'}, status=status.HTTP_200_OK)
+                    # return redirect('basic_setup_profile')
+            else:
+                return Response({'message': 'Mã OTP không hợp lệ.'}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response({'message': 'Mã OTP không hợp lệ.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST', 'GET'])
 def basic_setup_profile(request):  # Đều dùng cho signup cũ và mới
     if request.method == 'GET':
-        return render(request, 'basicSetupProfile.html')
+        return Response({'success': 'Enter username and choose avatar'}, status=status.HTTP_200_OK)
 
     if request.method == 'POST':
-        username = request.data.get('username')
-        file = request.FILES.get('filename')
-        print('password: ', cache.get('password'))
-        print('username: ', username)
+        serializer = serializers.UserSignupSerializer(data=request.data)
+        if serializer.is_valid():
+            username = serializer.validated_data.get('username')
+            avatar = serializer.validated_data.get('avatar')
 
-        # Check if the username is already taken
-        if User.objects.filter(username=username).exists():
-            return render(request, 'basicSetupProfile.html', {'error': 'Username already taken.'})
-        else:
-            # Upload image to Cloudinary
-            if file:
-                response = cloudinary.uploader.upload(file)
-                avatar_url = response.get('url')
-                # is_active=0 vs user has used phone be4 & create new user
-                User.objects.filter(phone=request.session.get('phone'), is_active=1).update(is_active=0)
-                user = User.objects.create_user(username=username, password=cache.get('password'),
-                                                phone=request.session.get('phone'), avatar=avatar_url)
-                user.is_active = 1
-                user.save()
-
-                login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-
-                cache.delete('password')  # Xóa cache_password_signup
-                del request.session['phone']  # Xóa session_phone_signup
-                print('del_catch_PW', cache.get('password'))
-                print('del_ss_phone', request.session.get('phone'))
-                # Redirect to another page after profile setup
-                return redirect('profile')
+            if User.objects.filter(username=username).exists():  # Check if the username is already taken
+                return Response({'error': 'Username already taken.'}, status=status.HTTP_400_BAD_REQUEST)
             else:
-                return render(request, 'basicSetupProfile.html', {
-                    'error': 'File upload failed.'
-                })
+                if avatar:
+                    response = cloudinary.uploader.upload(avatar)
+                    avatar_url = response.get('url')
+                    # is_active=0 vs user has used phone be4 & create new user
+                    User.objects.filter(phone=request.session.get('phone'), is_active=1).update(is_active=0)
+                    user = User.objects.create_user(username=username, password=cache.get('password'),
+                                                    phone=request.session.get('phone'), avatar=avatar_url)
+                    user.is_active = 1
+                    user.save()
+
+                    login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+
+                    cache.delete('password')  # Xóa cache_password_signup
+                    if 'phone' in request.session:
+                        del request.session['phone']  # Xóa session_phone_signup
+                    # Redirect to another page after profile setup
+                    return Response({'success': 'User created successfully'}, status=status.HTTP_200_OK)
+                else:
+                    return Response({'error': 'File upload failed'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 def profile_view(request):
