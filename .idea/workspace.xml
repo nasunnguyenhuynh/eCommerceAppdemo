@@ -5,10 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f8aae7f5-1761-47f4-98f0-8cb0dcfde433" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/eCommerceApp/ecommerce/perms.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/eCommerceApp.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/eCommerceApp.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/eCommerceApp/eCommerceApp/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/eCommerceApp/eCommerceApp/settings.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/eCommerceApp/ecommerce/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/eCommerceApp/ecommerce/serializers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eCommerceApp/ecommerce/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/eCommerceApp/ecommerce/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/eCommerceApp/ecommerce/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/eCommerceApp/ecommerce/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -101,7 +103,8 @@
       <workItem from="1713574845495" duration="3071000" />
       <workItem from="1713578029548" duration="32041000" />
       <workItem from="1713666326913" duration="14425000" />
-      <workItem from="1713695777387" duration="16619000" />
+      <workItem from="1713695777387" duration="17041000" />
+      <workItem from="1713746557216" duration="11267000" />
     </task>
     <servers />
   </component>

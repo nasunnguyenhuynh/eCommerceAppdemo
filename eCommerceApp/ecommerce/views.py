@@ -9,7 +9,7 @@ from .models import Category, User, Product, Shop, ProductInfo, ProductImageDeta
     ProductSell, Voucher, VoucherCondition, VoucherType, ConfirmationShop, \
     StatusConfirmationShop
 from rest_framework import viewsets, generics, status, parsers, permissions
-from . import serializers
+from . import serializers, perms
 from rest_framework.decorators import action, api_view, authentication_classes, permission_classes
 from rest_framework.response import Response
 from django.core.cache import cache
@@ -45,23 +45,6 @@ def user_login(request):
                     return Response({'success': 'Login successfully'}, status=status.HTTP_200_OK)
             return Response({'error': 'Invalid phone or password.'}, status=status.HTTP_401_UNAUTHORIZED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-# @api_view(['GET', 'POST'])
-# def user_login(request):
-#     if request.method == 'GET':
-#         return render(request, 'login.html')
-#
-#     if request.method == 'POST':
-#         phone = request.data.get('phone')
-#         password = request.data.get('password')
-#         users_with_phone = User.objects.filter(phone=phone, is_active=1)  # return query set
-#         if users_with_phone.exists():  # Match phone & is_active
-#             user = authenticate(request, username=users_with_phone.first().username, password=password)
-#             if user is not None:  # Match username = password
-#                 login(request, user)
-#                 return redirect('profile')
-#         return Response({'error': 'Invalid phone or password.'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
 def log_out(request):
@@ -106,9 +89,6 @@ def user_signup(request):
         return Response({'error': 'Invalid phone or password.'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
-# Test Postman
-# POST /verify-otp/ phone_number, otp
-# POST /login-with-sms/ phone_number
 # Thời gian hết hạn của mã OTP (đơn vị: giây)
 OTP_EXPIRY_SECONDS = 300  # 5 phút
 
@@ -327,9 +307,51 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
         return Response(serializers.ShopSerializer(shop).data, status=status.HTTP_200_OK)
 
 
+# =============================== (^3^) =============================== #
+
+# POST compare/ (receive name_product & name_shop)
+# GET compare/?page=?&q= (q is name_product;
+# Return product with name_product, price_product, name_shop,
+# *location_shop, *shipping unit, ratings, 1st latest comments)
+
+
 class ShopViewSet(viewsets.ViewSet, generics.CreateAPIView):
-    serializers_class = serializers.ShopSerializer
+    queryset = Shop.objects.filter(active=True)
+    serializer_class = serializers.ShopSerializer
+    permission_classes = [perms.ShopOwner]
+    parser_classes = [parsers.MultiPartParser, ]  # to receive file
+
+    # GET/POST/PUT/PATCH/DELETE /shops <Bear Token Owner>
+    # GET/POST/PUT/PATCH/DELETE shops/{shop_id}/products  <Bear Token is owner>
+    # POST/PATCH/DELETE shops/{shop_id}/ratings  <Bear Token is owner>
+    # GET shops/{shop_id}/ratings
+    # POST/PATCH/DELETE shops/{shop_id}/comments  <Bear Token is owner>
+    # GET shops/{shop_id}/comments
 
 
 class ProductViewSet(viewsets.ViewSet, generics.ListAPIView):
     pass
+    # GET products/
+    # GET products/?page=?&product_name=&shop_name=&price_from=&price_to=
+    # -> getByName/Price/Shop , arrangeByName/Price, paginate 20 products/page
+    # POST/PATCH/DELETE products/{product_id}/ratings  <Bear Token is owner>
+    # GET products/{product_id}/ratings
+    # POST/PATCH/DELETE products/{product_id}/comments  <Bear Token is owner>
+    # GET products/{product_id}/comments
+
+
+# =============================== (^3^) =============================== #
+
+
+class CategoryViewset(viewsets.ViewSet, generics.ListAPIView):
+    queryset = Category.objects.all()
+    serializer_class = serializers.CategorySerializer
+# GET categories/
+
+# =============================== (^3^) =============================== #
+# GET payment/
+# POST payment/{id_method} <Bear Token is owner>
+
+# =============================== (^3^) =============================== #
+# GET statistics/revenue/?category_id=&?product_id=?q= (q = mm/qq/yyyy) <Bear Token is owner>
+# GET statistics/{shop_id}/?q= (mm/qq/yyyy) <Bear Token is owner> (return the number of products sold in every category)

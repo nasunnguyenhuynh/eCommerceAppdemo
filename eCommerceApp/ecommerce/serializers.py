@@ -58,6 +58,12 @@ class ConfirmationShopSerializer(ModelSerializer):
         return rep
 
 
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = '__all__'
+
+
 class UserLoginSerializer(serializers.Serializer):
     phone = serializers.CharField()
     password = serializers.CharField()
